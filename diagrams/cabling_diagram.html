@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sapphire Tower - Cabling & Physical Infrastructure | Israr Sadaq</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Consolas', monospace;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 span {
+            color: #ffd700;
+        }
+
+        .cable-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .cable-stat {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        /* Legend */
+        .legend {
+            background: white;
+            border-radius: 20px;
+            padding: 15px 25px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .cable-line {
+            width: 40px;
+            height: 3px;
+            border-radius: 3px;
+        }
+
+        .fiber { background: linear-gradient(90deg, #f97316, #22c55e); }
+        .cat6a { background: linear-gradient(90deg, #06b6d4, #3b82f6); }
+        .cat6 { background: linear-gradient(90deg, #22c55e, #84cc16); }
+        .patch { background: linear-gradient(90deg, #a855f7, #ec489a); }
+
+        /* Floor Sections */
+        .floor-section {
+            background: white;
+            border-radius: 24px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .floor-title {
+            padding: 15px 25px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .floor-1 { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+        .floor-2 { background: linear-gradient(135deg, #f97316, #ea580c); }
+        .floor-3 { background: linear-gradient(135deg, #eab308, #ca8a04); }
+        .floor-4 { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .floor-5 { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .basement { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .core { background: linear-gradient(135deg, #1e293b, #0f172a); }
+
+        .floor-content {
+            padding: 20px;
+        }
+
+        /* IDF Rack */
+        .idf-rack {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .rack-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .rack-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .rack-location {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* Cable Table */
+        .cable-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .cable-table th {
+            text-align: left;
+            padding: 8px;
+            background: #334155;
+            color: white;
+            font-size: 11px;
+        }
+
+        .cable-table td {
+            padding: 8px;
+            border-bottom: 1px solid #334155;
+            font-size: 11px;
+            font-family: monospace;
+        }
+
+        .cable-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .type-fiber { background: #f97316; color: white; }
+        .type-cat6a { background: #06b6d4; color: white; }
+        .type-cat6 { background: #22c55e; color: white; }
+        .type-patch { background: #a855f7; color: white; }
+
+        /* Patch Panel */
+        .patch-panel {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .patch-title {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+
+        .port-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 5px;
+        }
+
+        .port {
+            background: #334155;
+            padding: 4px;
+            text-align: center;
+            font-size: 9px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .port-active {
+            background: #22c55e;
+            color: white;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .summary-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .summary-label {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            padding: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🏢 SAPPHIRE TOWER - <span>CABLING & PHYSICAL INFRASTRUCTURE</span></h1>
+        <p>Complete Cable Plant Design | Fiber Backbone | Copper Distribution | Patch Panel Layout</p>
+        <div class="cable-stats">
+            <div class="cable-stat">🔌 Total Cable Length: 4,850 meters</div>
+            <div class="cable-stat">📡 Fiber Optic: 850 meters</div>
+            <div class="cable-stat">🟢 Cat6a Copper: 2,200 meters</div>
+            <div class="cable-stat">🟡 Cat6 Copper: 1,800 meters</div>
+        </div>
+        <div style="margin-top: 15px;">Network Engineer: Israr Sadaq | CCNA | CCNP | Berlin, Germany</div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-item"><div class="cable-line fiber"></div><span>Single-mode Fiber (10G-40G)</span></div>
+        <div class="legend-item"><div class="cable-line cat6a"></div><span>Cat6a (10Gbps) - Uplinks</span></div>
+        <div class="legend-item"><div class="cable-line cat6"></div><span>Cat6 (1Gbps) - End Devices</span></div>
+        <div class="legend-item"><div class="cable-line patch"></div><span>Patch Cables (Switch → Patch Panel)</span></div>
+        <div class="legend-item"><span>📦 = 24-Port Patch Panel</span></div>
+        <div class="legend-item"><span>🔌 = Switch</span></div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+        <div class="summary-card"><div class="summary-number">7</div><div class="summary-label">IDF Rooms</div></div>
+        <div class="summary-card"><div class="summary-number">13</div><div class="summary-label">Network Switches</div></div>
+        <div class="summary-card"><div class="summary-number">24</div><div class="summary-label">Patch Panels</div></div>
+        <div class="summary-card"><div class="summary-number">312</div><div class="summary-label">Total Ports</div></div>
+        <div class="summary-card"><div class="summary-number">12</div><div class="summary-label">Fiber Strands</div></div>
+        <div class="summary-card"><div class="summary-number">4,850m</div><div class="summary-label">Total Cable</div></div>
+    </div>
+
+    <!-- Core Layer (MDF) -->
+    <div class="floor-section">
+        <div class="floor-title core">
+            <span>⚡ MAIN DISTRIBUTION FRAME (MDF) - BASEMENT SERVER ROOM</span>
+            <span style="font-size: 12px;">📍 Room B-001 | Rack A1</span>
+        </div>
+        <div class="floor-content">
+            <div class="idf-rack">
+                <div class="rack-header">
+                    <span class="rack-name">RACK A1 - CORE INFRASTRUCTURE</span>
+                    <span class="rack-location">42U Server Rack | Top of Rack (ToR)</span>
+                </div>
+                <table class="cable-table">
+                    <thead>
+                        <tr><th>From</th><th>To</th><th>Cable Type</th><th>Length</th><th>Port</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>PTCL Gateway</td><td>Firewall-01</td><td><span class="cable-type type-cat6a">Cat6a</span></td><td>3m</td><td>Eth0/0</td><td>Internet Handoff</td></tr>
+                        <tr><td>Firewall-01</td><td>Core-SW-01</td><td><span class="cable-type type-fiber">Single-mode Fiber</span></td><td>5m</td><td>Te1/0/1</td><td>40Gbps Trunk</td></tr>
+                        <tr><td>Core-SW-01</td><td>Dist-SW-F1 (Floor 1)</td><td><span class="cable-type type-fiber">Single-mode Fiber</span></td><td>45m</td><td>Te1/0/2</td><td>10Gbps Uplink</td></tr>
+                        <tr><td>Core-SW-01</td><td>Dist-SW-F2 (Floor 2)</td><td><span class="cable-type type-fiber">Single-mode Fiber</span></td><td>55m</td><td>Te1/0/3</td><td>10Gbps Uplink</td></tr>
+                        <tr><td>Core-SW-01</td><td>Dist-SW-F3 (Floor 3)</td><td><span class="cable-type type-fiber">Single-mode Fiber</span></td><td>65m</td><td>Te1/0/4</td><td>10Gbps Uplink</td></tr>
+                        <tr><td>Core-SW-01</td><td>Dist-SW-F4 (Floor 4)</td><td><span class="cable-type type-fiber">Single-mode Fiber</span></td><td>75m</td><td>Te1/0/5</td><td>10Gbps Uplink</td></tr>
+                        <tr><td>Core-SW-01</td><td>Dist-SW-F5 (Floor 5)</td><td><span class="cable-type type-fiber">Single-mode Fiber</span></td><td>85m</td><td>Te1/0/6</td><td>10Gbps Uplink</td></tr>
+                        <tr><td>Core-SW-01</td><td>Dist-SW-B1 (Basement)</td><td><span class="cable-type type-cat6a">Cat6a</span></td><td>15m</td><td>Te1/0/7</td><td>10Gbps Uplink</td></tr>
+                        <tr><td>Core-SW-01</td><td>NVR-01</td><td><span class="cable-type type-cat6">Cat6</span></td><td>8m</td><td>Gi1/0/48</td><td>CCTV Recording</td></tr>
+                    </tbody>
+                </table>
+                <div class="patch-panel">
+                    <div class="patch-title">📦 PATCH PANEL PP-MDF-1 (24-Port Cat6a)</div>
+                    <div class="port-grid">
+                        <div class="port port-active">1<br>Core</div><div class="port port-active">2<br>FW</div><div class="port">3</div><div class="port">4</div>
+                        <div class="port">5</div><div class="port">6</div><div class="port">7</div><div class="port">8</div>
+                        <div class="port">9</div><div class="port">10</div><div class="port">11</div><div class="port">12</div>
+                        <div class="port">13</div><div class="port">14</div><div class="port">15</div><div class="port">16</div>
+                        <div class="port">17</div><div class="port">18</div><div class="port">19</div><div class="port">20</div>
+                        <div class="port">21</div><div class="port">22</div><div class="port">23</div><div class="port">24</div>
+                    </div>
+                    <div class="patch-title" style="margin-top: 10px;">🔌 CONNECTED: Ports 1-2 (Active)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floor 1 IDF -->
+    <div class="floor-section">
+        <div class="floor-title floor-1">
+            <span>📍 FLOOR 1 IDF - West Side</span>
+            <span style="font-size: 12px;">Room 1-101 | Rack B1</span>
+        </div>
+        <div class="floor-content">
+            <div class="idf-rack">
+                <div class="rack-header">
+                    <span class="rack-name">RACK B1 - FLOOR 1 NETWORK</span>
+                    <span class="rack-location">12U Wall-Mount Rack</span>
+                </div>
+                <table class="cable-table">
+                    <thead><tr><th>From</th><th>To</th><th>Cable Type</th><th>Length</th><th>Port</th><th>Purpose</th></tr></thead>
+                    <tbody>
+                        <tr><td>Dist-SW-F1</td><td>Access-F1</td><td><span class="cable-type type-cat6a">Cat6a</span></td><td>2m</td><td>Te1/0/1</td><td>10Gbps Stack</td></tr>
+                        <tr><td>Access-F1</td><td>PP-F1-01</td><td><span class="cable-type type-patch">Cat6 Patch</span></td><td>1m</td><td>Gi1/0/1-24</td><td>Patch Panel</td></tr>
+                        <tr><td>PP-F1-01</td><td>Camera 1 (Lobby)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>25m</td><td>Port 1</td><td>PoE Camera</td></tr>
+                        <tr><td>PP-F1-01</td><td>Camera 2 (Reception)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>18m</td><td>Port 2</td><td>PoE Camera</td></tr>
+                        <tr><td>PP-F1-01</td><td>Camera 3 (Coffee)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>22m</td><td>Port 3</td><td>PoE Camera</td></tr>
+                        <tr><td>PP-F1-01</td><td>Camera 4 (Retail)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>30m</td><td>Port 4</td><td>PoE Camera</td></tr>
+                        <tr><td>PP-F1-01</td><td>AP-1 (Lobby)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>28m</td><td>Port 5</td><td>PoE AP</td></tr>
+                        <tr><td>PP-F1-01</td><td>AP-2 (Reception)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>20m</td><td>Port 6</td><td>PoE AP</td></tr>
+                        <tr><td>PP-F1-01</td><td>AP-3 (Coffee)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>24m</td><td>Port 7</td><td>PoE AP</td></tr>
+                        <tr><td>PP-F1-01</td><td>AP-4 (Retail)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>32m</td><td>Port 8</td><td>PoE AP</td></tr>
+                        <tr><td>PP-F1-01</td><td>Workstations (15)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>10-40m</td><td>Port 9-23</td><td>User Data</td></tr>
+                    </tbody>
+                </table>
+                <div class="patch-panel">
+                    <div class="patch-title">📦 PATCH PANEL PP-F1-01 (24-Port Cat6)</div>
+                    <div class="port-grid">
+                        <div class="port port-active">1<br>Cam1</div><div class="port port-active">2<br>Cam2</div><div class="port port-active">3<br>Cam3</div><div class="port port-active">4<br>Cam4</div>
+                        <div class="port port-active">5<br>AP1</div><div class="port port-active">6<br>AP2</div><div class="port port-active">7<br>AP3</div><div class="port port-active">8<br>AP4</div>
+                        <div class="port port-active">9<br>WS1</div><div class="port port-active">10<br>WS2</div><div class="port port-active">11<br>WS3</div><div class="port port-active">12<br>WS4</div>
+                        <div class="port">13</div><div class="port">14</div><div class="port">15</div><div class="port">16</div>
+                        <div class="port">17</div><div class="port">18</div><div class="port">19</div><div class="port">20</div>
+                        <div class="port">21</div><div class="port">22</div><div class="port">23</div><div class="port">24</div>
+                    </div>
+                    <div class="patch-title" style="margin-top: 10px;">🔌 ACTIVE PORTS: 1-12 (18 cables total)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floor 4 IDF (IT Department - Detailed Example) -->
+    <div class="floor-section">
+        <div class="floor-title floor-4">
+            <span>📍 FLOOR 4 IDF - North Side (IT Department)</span>
+            <span style="font-size: 12px;">Room 4-401 | Rack C1</span>
+        </div>
+        <div class="floor-content">
+            <div class="idf-rack">
+                <div class="rack-header">
+                    <span class="rack-name">RACK C1 - FLOOR 4 NETWORK</span>
+                    <span class="rack-location">24U Rack | Main IT IDF</span>
+                </div>
+                <table class="cable-table">
+                    <thead><tr><th>From</th><th>To</th><th>Cable Type</th><th>Length</th><th>Port</th><th>Purpose</th></tr></thead>
+                    <tbody>
+                        <tr><td>Core-SW-01 (MDF)</td><td>Dist-SW-F4</td><td><span class="cable-type type-fiber">Single-mode Fiber</span></td><td>75m</td><td>Fiber Trunk</td><td>10Gbps Uplink</td></tr>
+                        <tr><td>Dist-SW-F4</td><td>Access-F4</td><td><span class="cable-type type-cat6a">Cat6a</span></td><td>3m</td><td>Te1/0/1</td><td>10Gbps Stack</td></tr>
+                        <tr><td>Access-F4</td><td>PP-F4-01</td><td><span class="cable-type type-patch">Cat6 Patch</span></td><td>1m</td><td>Gi1/0/1-24</td><td>Patch Panel</td></tr>
+                        <tr><td>PP-F4-01</td><td>Camera (IT Lab)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>35m</td><td>Port 1</td><td>PoE Camera</td></tr>
+                        <tr><td>PP-F4-01</td><td>Camera (NOC)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>28m</td><td>Port 2</td><td>PoE Camera</td></tr>
+                        <tr><td>PP-F4-01</td><td>Camera (Server Room)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>20m</td><td>Port 3</td><td>PoE Camera</td></tr>
+                        <tr><td>PP-F4-01</td><td>APs (4 units)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>15-40m</td><td>Port 4-7</td><td>PoE APs (9130AXI)</td></tr>
+                        <tr><td>PP-F4-01</td><td>IT Workstations (30)</td><td><span class="cable-type type-cat6">Cat6</span></td><td>5-50m</td><td>Port 8-37</td><td>User Data</td></tr>
+                        <tr><td>PP-F4-01</td><td>Server Room Switch</td><td><span class="cable-type type-cat6a">Cat6a</span></td><td>15m</td><td>Port 38</td><td>Server VLAN</td></tr>
+                    </tbody>
+                </table>
+                <div class="patch-panel">
+                    <div class="patch-title">📦 PATCH PANEL PP-F4-01 (48-Port Cat6)</div>
+                    <div class="port-grid" style="grid-template-columns: repeat(12, 1fr);">
+                        <div class="port port-active">1</div><div class="port port-active">2</div><div class="port port-active">3</div><div class="port port-active">4</div>
+                        <div class="port port-active">5</div><div class="port port-active">6</div><div class="port port-active">7</div><div class="port port-active">8</div>
+                        <div class="port port-active">9</div><div class="port port-active">10</div><div class="port port-active">11</div><div class="port port-active">12</div>
+                        <div class="port">13</div><div class="port">14</div><div class="port">15</div><div class="port">16</div>
+                        <div class="port">17</div><div class="port">18</div><div class="port">19</div><div class="port">20</div>
+                        <div class="port">21</div><div class="port">22</div><div class="port">23</div><div class="port">24</div>
+                        <div class="port">25</div><div class="port">26</div><div class="port">27</div><div class="port">28</div>
+                        <div class="port">29</div><div class="port">30</div><div class="port">31</div><div class="port">32</div>
+                        <div class="port">33</div><div class="port">34</div><div class="port">35</div><div class="port">36</div>
+                        <div class="port port-active">37</div><div class="port">38</div><div class="port">39</div><div class="port">40</div>
+                    </div>
+                    <div class="patch-title" style="margin-top: 10px;">🔌 ACTIVE PORTS: 1-12, 37 (33 cables total)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Riser Cable Summary -->
+    <div class="floor-section">
+        <div class="floor-title core">
+            <span>📡 VERTICAL RISER CABLING (Backbone)</span>
+            <span style="font-size: 12px;">Main Telecom Riser Shaft</span>
+        </div>
+        <div class="floor-content">
+            <table class="cable-table" style="width: 100%;">
+                <thead><tr><th>Route</th><th>Cable Type</th><th>Fiber/Copper Count</th><th>Length</th><th>Path</th><th>Conduit Size</th></tr></thead>
+                <tbody>
+                    <tr><td>MDF → Floor 1 IDF</td><td><span class="cable-type type-fiber">SM Fiber</span></td><td>12 Strands (6 used)</td><td>45m</td><td>Riser Shaft A</td><td>2" EMT</td></tr>
+                    <tr><td>MDF → Floor 2 IDF</td><td><span class="cable-type type-fiber">SM Fiber</span></td><td>12 Strands (6 used)</td><td>55m</td><td>Riser Shaft A</td><td>2" EMT</td></tr>
+                    <tr><td>MDF → Floor 3 IDF</td><td><span class="cable-type type-fiber">SM Fiber</span></td><td>12 Strands (6 used)</td><td>65m</td><td>Riser Shaft A</td><td>2" EMT</td></tr>
+                    <tr><td>MDF → Floor 4 IDF</td><td><span class="cable-type type-fiber">SM Fiber</span></td><td>12 Strands (6 used)</td><td>75m</td><td>Riser Shaft A</td><td>2" EMT</td></tr>
+                    <tr><td>MDF → Floor 5 IDF</td><td><span class="cable-type type-fiber">SM Fiber</span></td><td>12 Strands (6 used)</td><td>85m</td><td>Riser Shaft A</td><td>2" EMT</td></tr>
+                    <tr><td>MDF → Basement IDF</td><td><span class="cable-type type-cat6a">Cat6a</span></td><td>6x Cat6a (Backup)</td><td>15m</td><td>Cable Tray</td><td>1.5" EMT</td></tr>
+                    <tr><td colspan="6" style="background: #f1f5f9;"><strong>📊 TOTAL FIBER: 60 Strands | TOTAL COPPER: 24x Cat6a Riser Cables</strong></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Material Summary -->
+    <div class="floor-section">
+        <div class="floor-title core">
+            <span>📦 CABLE MATERIAL SUMMARY</span>
+            <span style="font-size: 12px;">Complete BOM</span>
+        </div>
+        <div class="floor-content">
+            <table class="cable-table" style="width: 100%;">
+                <thead><tr><th>Material</th><th>Quantity</th><th>Length</th><th>Usage</th></tr></thead>
+                <tbody>
+                    <tr><td>Single-mode Fiber (12-strand)</td><td>6 runs</td><td>450m</td><td>Core to Floor IDFs</td></tr>
+                    <tr><td>Cat6a (Riser)</td><td>12 boxes</td><td>2,200m</td><td>Switch Uplinks, Server Connections</td></tr>
+                    <tr><td>Cat6 (Plenum)</td><td>18 boxes</td><td>1,800m</td><td>End Devices (Cameras, APs, Workstations)</td></tr>
+                    <tr><td>Cat6 Patch Cables (1-3m)</td><td>180</td><td>-</td><td>Switch to Patch Panel</td></tr>
+                    <tr><td>24-Port Patch Panels</td><td>18</td><td>-</td><td>IDF Termination</td></tr>
+                    <tr><td>48-Port Patch Panels</td><td>6</td><td>-</td><td>MDF & High-Density IDFs</td></tr>
+                    <tr><td>Cable Trays</td><td>150m</td><td>-</td><td>Horizontal Distribution</td></tr>
+                    <tr><td>Conduit (EMT 2")</td><td>400m</td><td>-</td><td>Vertical Riser</td></tr>
+                    <tr><td>Wall Plates & Faceplates</td><td>180</td><td>-</td><td>Workstation Outlets</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>© 2026 Israr Sadaq | Network Engineer | CCNA | CCNP | Berlin, Germany</p>
+        <p>📧 israrsadaq057@gmail.com | 📱 +49 152525267799</p>
+        <p>🔌 All cables are color-coded: Yellow = Fiber | Blue = Cat6a | Gray = Cat6 | Red = Cross-over</p>
+    </div>
+</div>
+</body>
+</html>

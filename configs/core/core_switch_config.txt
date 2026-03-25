@@ -1,0 +1,216 @@
+!
+! ============================================================================
+! SAPPHIRE TOWER - CORE SWITCH CONFIGURATION
+! Device: Core-SW-01
+! Model: Cisco Catalyst 9300-48P
+! Location: Basement - Server Room (MDF)
+! Network Engineer: Israr Sadaq
+! Date: March 2026
+! ============================================================================
+
+! Hostname
+hostname Core-SW-01
+
+! Enable Password
+enable secret Sapphire@2026
+
+! ============================================================================
+! VLAN CONFIGURATION
+! ============================================================================
+vlan 10
+ name Management
+!
+vlan 20
+ name CCTV
+!
+vlan 30
+ name WiFi-Staff
+!
+vlan 40
+ name WiFi-Guest
+!
+vlan 50
+ name Data
+!
+vlan 60
+ name Control-Room
+!
+vlan 70
+ name VoIP
+!
+vlan 80
+ name Server
+
+! ============================================================================
+! INTERFACE VLAN (SVI) - Gateways
+! ============================================================================
+interface Vlan10
+ description Management Gateway
+ ip address 10.10.10.1 255.255.255.0
+ no shutdown
+!
+interface Vlan20
+ description CCTV Gateway
+ ip address 10.10.20.1 255.255.255.0
+ no shutdown
+!
+interface Vlan30
+ description WiFi-Staff Gateway
+ ip address 10.10.30.1 255.255.255.0
+ no shutdown
+!
+interface Vlan40
+ description WiFi-Guest Gateway
+ ip address 172.16.40.1 255.255.255.0
+ no shutdown
+!
+interface Vlan50
+ description Data Gateway
+ ip address 10.10.50.1 255.255.255.0
+ no shutdown
+!
+interface Vlan60
+ description Control-Room Gateway
+ ip address 10.10.60.1 255.255.255.0
+ no shutdown
+!
+interface Vlan70
+ description VoIP Gateway
+ ip address 10.10.70.1 255.255.255.0
+ no shutdown
+!
+interface Vlan80
+ description Server Gateway
+ ip address 10.10.80.1 255.255.255.0
+ no shutdown
+
+! ============================================================================
+! DHCP SERVER CONFIGURATION
+! ============================================================================
+ip dhcp excluded-address 10.10.30.1 10.10.30.99
+ip dhcp excluded-address 10.10.50.1 10.10.50.99
+ip dhcp excluded-address 172.16.40.1 172.16.40.49
+
+! DHCP Pool for WiFi-Staff
+ip dhcp pool WIFI-STAFF
+ network 10.10.30.0 255.255.255.0
+ default-router 10.10.30.1
+ dns-server 10.10.10.10 8.8.8.8
+ domain-name sapphire.local
+ lease 8
+
+! DHCP Pool for Data VLAN
+ip dhcp pool DATA
+ network 10.10.50.0 255.255.255.0
+ default-router 10.10.50.1
+ dns-server 10.10.10.10 8.8.8.8
+ domain-name sapphire.local
+ lease 7
+
+! DHCP Pool for Guest WiFi
+ip dhcp pool GUEST
+ network 172.16.40.0 255.255.255.0
+ default-router 172.16.40.1
+ dns-server 8.8.8.8 8.8.4.4
+ domain-name guest.sapphire.local
+ lease 1
+
+! ============================================================================
+! UPLINK PORTS TO DISTRIBUTION SWITCHES (Fiber)
+! ============================================================================
+interface TenGigabitEthernet1/0/1
+ description Uplink to Dist-SW-F1 (Floor 1) - 10Gbps Fiber
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50,60
+ no shutdown
+!
+interface TenGigabitEthernet1/0/2
+ description Uplink to Dist-SW-F2 (Floor 2) - 10Gbps Fiber
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+ no shutdown
+!
+interface TenGigabitEthernet1/0/3
+ description Uplink to Dist-SW-F3 (Floor 3) - 10Gbps Fiber
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+ no shutdown
+!
+interface TenGigabitEthernet1/0/4
+ description Uplink to Dist-SW-F4 (Floor 4) - 10Gbps Fiber
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50,80
+ no shutdown
+!
+interface TenGigabitEthernet1/0/5
+ description Uplink to Dist-SW-F5 (Floor 5) - 10Gbps Fiber
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+ no shutdown
+!
+interface TenGigabitEthernet1/0/6
+ description Uplink to Dist-SW-B1 (Basement) - 10Gbps Cat6a
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50,60
+ no shutdown
+
+! ============================================================================
+! PORT TO FIREWALL
+! ============================================================================
+interface GigabitEthernet1/0/48
+ description Link to Firewall-01
+ switchport mode trunk
+ switchport trunk allowed vlan 10,30,40,50,80
+ no shutdown
+
+! ============================================================================
+! IP ROUTING & OSPF
+! ============================================================================
+ip routing
+!
+router ospf 1
+ router-id 10.10.10.1
+ network 10.10.10.0 0.0.0.255 area 0
+ network 10.10.20.0 0.0.0.255 area 0
+ network 10.10.30.0 0.0.0.255 area 0
+ network 10.10.50.0 0.0.0.255 area 0
+ network 10.10.60.0 0.0.0.255 area 0
+ network 10.10.70.0 0.0.0.255 area 0
+ network 10.10.80.0 0.0.0.255 area 0
+!
+ip route 0.0.0.0 0.0.0.0 10.10.10.254
+
+! ============================================================================
+! MANAGEMENT CONFIGURATION
+! ============================================================================
+interface Vlan10
+ ip address 10.10.10.1 255.255.255.0
+!
+ip default-gateway 10.10.10.254
+!
+ip domain-name sapphire.local
+crypto key generate rsa modulus 2048
+!
+username admin privilege 15 secret Sapphire@2026
+!
+line vty 0 15
+ transport input ssh
+ login local
+ exec-timeout 15 0
+!
+line console 0
+ logging synchronous
+ exec-timeout 0 0
+!
+logging buffered 16384
+logging host 10.10.60.20
+!
+snmp-server community Sapphire_RO RO
+snmp-server location Basement - Server Room
+snmp-server contact israrsadaq057@gmail.com
+!
+ntp server pool.ntp.org
+!
+! Save Configuration
+end
+write memory

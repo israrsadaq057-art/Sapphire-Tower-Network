@@ -1,0 +1,70 @@
+================================================================================
+CAMERA CONFIGURATION - FLOOR 4 SERVER ROOM (CRITICAL INFRASTRUCTURE)
+================================================================================
+
+Camera ID:           CAM-F4-03
+Camera Name:         ServerRoom_Camera
+Location:            Server Room - Rack Entrance
+Floor:               4
+Switch:              Access-SW-F4
+Port:                Gi1/0/4
+MAC Address:         00:1A:2B:3C:4D:70
+
+================================================================================
+NETWORK SETTINGS
+================================================================================
+IP Address:          10.10.20.43
+Subnet Mask:         255.255.255.0
+Default Gateway:     10.10.20.1
+DNS Server 1:        10.10.10.10
+DNS Server 2:        8.8.8.8
+
+================================================================================
+VIDEO SETTINGS
+================================================================================
+Resolution:          3840 x 2160 (4K)
+Frame Rate:          30 fps
+Bitrate:             15 Mbps
+Codec:               H.265
+WDR:                 Enabled
+
+================================================================================
+MOTION DETECTION
+================================================================================
+Motion Detection:    Enabled (Critical)
+Sensitivity:         Very High (95)
+Areas:               Server Racks and Entrance
+Schedule:            24/7
+Trigger:             Record to NVR, Email Alert to IT, SMS Alert
+
+================================================================================
+NVR REGISTRATION
+================================================================================
+NVR IP:              10.10.60.10
+Channel:             13
+Protocol:            ONVIF
+Username:            admin
+Password:            Camera@2026
+Recording Mode:      Continuous 24/7
+Pre-record:          60 seconds
+Post-record:         60 seconds
+
+================================================================================
+ACCESS CONTROL
+================================================================================
+Allowed Destinations: 10.10.60.10 (NVR Only)
+VLAN:                 20 (CCTV)
+Alerts:              Email to noc@sapphire.com, SMS to IT Manager
+
+================================================================================
+PoE INFORMATION
+================================================================================
+PoE Status:          Active
+Power Consumption:   12W
+PoE Budget Used:     156W / 370W
+
+================================================================================
+CONTACT INFO
+================================================================================
+Installer:           Israr Sadaq
+Date Installed:      2026-03-25

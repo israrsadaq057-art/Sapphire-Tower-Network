@@ -1,0 +1,58 @@
+================================================================================
+SAPPHIRE TOWER - CCTV CAMERA IP ALLOCATION
+Network Engineer: Israr Sadaq
+Date: March 2026
+================================================================================
+
+CAMERA IP ALLOCATION TABLE:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        CAMERA IP ALLOCATION TABLE                          │
+├──────────────┬─────────────────────┬───────────────────┬───────────────────┤
+│   Floor      │   Camera Location   │   IP Address      │   Switch Port     │
+├──────────────┼─────────────────────┼───────────────────┼───────────────────┤
+│ FLOOR 1      │                     │                   │                   │
+│              │ Lobby Camera        │ 10.10.20.11       │ Access-F1 Gi1/0/2│
+│              │ Reception Camera    │ 10.10.20.12       │ Access-F1 Gi1/0/3│
+│              │ Coffee Shop Camera  │ 10.10.20.13       │ Access-F1 Gi1/0/4│
+│              │ Retail Camera       │ 10.10.20.14       │ Access-F1 Gi1/0/5│
+├──────────────┼─────────────────────┼───────────────────┼───────────────────┤
+│ FLOOR 2      │                     │                   │                   │
+│              │ Marketing Camera    │ 10.10.20.21       │ Access-F2 Gi1/0/2│
+│              │ Sales Camera        │ 10.10.20.22       │ Access-F2 Gi1/0/3│
+│              │ Elevator Camera     │ 10.10.20.23       │ Access-F2 Gi1/0/4│
+├──────────────┼─────────────────────┼───────────────────┼───────────────────┤
+│ FLOOR 3      │                     │                   │                   │
+│              │ Finance Camera      │ 10.10.20.31       │ Access-F3 Gi1/0/2│
+│              │ HR Camera           │ 10.10.20.32       │ Access-F3 Gi1/0/3│
+│              │ Elevator Camera     │ 10.10.20.33       │ Access-F3 Gi1/0/4│
+├──────────────┼─────────────────────┼───────────────────┼───────────────────┤
+│ FLOOR 4      │                     │                   │                   │
+│              │ IT Lab Camera       │ 10.10.20.41       │ Access-F4 Gi1/0/2│
+│              │ NOC Camera          │ 10.10.20.42       │ Access-F4 Gi1/0/3│
+│              │ Server Room Camera  │ 10.10.20.43       │ Access-F4 Gi1/0/4│
+│              │ Elevator Camera     │ 10.10.20.44       │ Access-F4 Gi1/0/5│
+├──────────────┼─────────────────────┼───────────────────┼───────────────────┤
+│ FLOOR 5      │                     │                   │                   │
+│              │ Executive Camera    │ 10.10.20.51       │ Access-F5 Gi1/0/2│
+│              │ Board Room Camera   │ 10.10.20.52       │ Access-F5 Gi1/0/3│
+│              │ Elevator Camera     │ 10.10.20.53       │ Access-F5 Gi1/0/4│
+├──────────────┼─────────────────────┼───────────────────┼───────────────────┤
+│ BASEMENT     │                     │                   │                   │
+│              │ Parking A Camera    │ 10.10.20.61       │ Access-B1 Gi1/0/2│
+│              │ Parking B Camera    │ 10.10.20.62       │ Access-B1 Gi1/0/3│
+│              │ Security Office Cam │ 10.10.20.63       │ Access-B1 Gi1/0/4│
+│              │ Elevator Camera     │ 10.10.20.64       │ Access-B1 Gi1/0/5│
+└──────────────┴─────────────────────┴───────────────────┴───────────────────┘
+
+TOTAL CAMERAS: 24
+
+NETWORK DETAILS:
+- VLAN: 20 (CCTV)
+- Subnet: 10.10.20.0/24
+- Gateway: 10.10.20.1
+- NVR IP: 10.10.60.10
+- All cameras use STATIC IP (no DHCP)
+- All cameras powered via PoE from access switches
+- Camera Username: admin
+- Camera Password: Camera@2026

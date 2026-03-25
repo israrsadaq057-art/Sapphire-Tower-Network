@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sapphire Tower - Complete Network Dashboard | Israr Sadaq</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0f1a 0%, #0f172a 100%);
+            min-height: 100vh;
+            overflow-x: auto;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-size: 12px;
+        }
+
+        /* Main Dashboard Layout */
+        .dashboard {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
+            position: sticky;
+            top: 90px;
+            height: fit-content;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffd700;
+        }
+
+        .stats-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .stats-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .device-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .device-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid;
+        }
+
+        .device-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+
+        .device-status {
+            font-size: 10px;
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .status-up { background: #28a745; }
+        .status-down { background: #dc3545; }
+
+        /* Main Canvas Area */
+        .canvas-area {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 20px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 20px;
+            border-radius: 24px 24px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 { font-size: 20px; }
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-body { padding: 20px; }
+        .info-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-label {
+            font-weight: bold;
+            width: 120px;
+            color: #666;
+        }
+        .info-value { color: #333; }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            padding: 15px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h1>🏢 Sapphire Tower - Network Infrastructure Dashboard</h1>
+        <p>Shahrah-e-Faisal, Karachi, Pakistan | Live Network Visualization</p>
+    </div>
+    <div>
+        <span class="badge">🔴 Live Monitoring</span>
+        <span class="badge">📡 Real-time Traffic</span>
+        <span class="badge">🎯 Click Devices for Details</span>
+    </div>
+</div>
+
+<div class="dashboard">
+    <div class="sidebar">
+        <h3>📊 Network Statistics</h3>
+        <div class="stats-card">
+            <div class="stats-number" id="totalDevices">0</div>
+            <div>Total Network Devices</div>
+        </div>
+        <div class="stats-card">
+            <div class="stats-number" id="activeDevices">0</div>
+            <div>Active Devices</div>
+        </div>
+        <div class="stats-card">
+            <div class="stats-number">24</div>
+            <div>Security Cameras</div>
+        </div>
+        <div class="stats-card">
+            <div class="stats-number">20</div>
+            <div>Access Points</div>
+        </div>
+
+        <h3 style="margin-top: 20px;">📡 Device List</h3>
+        <div class="device-list" id="deviceList"></div>
+
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background: #dc3545;"></div><span>Core Switch</span></div>
+            <div class="legend-item"><div class="legend-color" style="background: #fd7e14;"></div><span>Distribution</span></div>
+            <div class="legend-item"><div class="legend-color" style="background: #28a745;"></div><span>Access Switch</span></div>
+            <div class="legend-item"><div class="legend-color" style="background: #17a2b8;"></div><span>Camera</span></div>
+            <div class="legend-item"><div class="legend-color" style="background: #ffc107;"></div><span>Access Point</span></div>
+            <div class="legend-item"><div class="legend-color" style="background: #6c757d;"></div><span>Firewall/Internet</span></div>
+        </div>
+    </div>
+
+    <div class="canvas-area">
+        <canvas id="networkCanvas" width="1300" height="800"></canvas>
+    </div>
+</div>
+
+<div class="footer">
+    <p>© 2026 Israr Sadaq | Network Engineer | CCNA | CCNP | Berlin, Germany</p>
+    <p>📧 israrsadaq057@gmail.com | 📱 +49 152525267799</p>
+</div>
+
+<div id="deviceModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Device Details</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // COMPLETE NETWORK DEVICE DATABASE
+    // ============================================================
+    const devices = [
+        // Core Layer
+        { id: "internet", name: "PTCL Gateway", type: "internet", status: "up", x: 650, y: 50, 
+          details: { ip: "203.124.30.1", isp: "PTCL Flash Fiber", speed: "100 Mbps", location: "ISP Exchange" } },
+        { id: "firewall", name: "Cisco Firepower 1120", type: "firewall", status: "up", x: 650, y: 110,
+          details: { ip: "10.10.10.254", model: "Firepower 1120", throughput: "1.2 Gbps", location: "Basement Server Room" } },
+        { id: "core", name: "Core-SW-01", type: "core", status: "up", x: 650, y: 180,
+          details: { ip: "10.10.10.1", model: "Cisco Catalyst 9300-48P", ports: 48, poe: "740W", location: "Basement Server Room" } },
+        
+        // Floor 1 - Distribution
+        { id: "dist-f1", name: "Dist-SW-F1", type: "distribution", status: "up", x: 150, y: 320, floor: "Floor 1", location: "West Side - Reception Area",
+          details: { ip: "10.10.10.11", model: "Cisco Catalyst 9200-24P", uplink: "Core-SW-01", devices: "4 Cameras, 4 APs, 15 Workstations" } },
+        { id: "access-f1", name: "Access-F1", type: "access", status: "up", x: 150, y: 450, parent: "dist-f1",
+          details: { ip: "10.10.50.11", model: "Cisco Catalyst 9200-24P", location: "Floor 1 - West IDF", ports_used: 18, ports_total: 24 } },
+        { id: "cam-f1-1", name: "Lobby Camera", type: "camera", status: "up", x: 50, y: 530, parent: "access-f1",
+          details: { ip: "10.10.20.11", model: "Hikvision DS-2CD2386G2", resolution: "4K", location: "Main Entrance Lobby - North Wall" } },
+        { id: "cam-f1-2", name: "Reception Camera", type: "camera", status: "up", x: 120, y: 530, parent: "access-f1",
+          details: { ip: "10.10.20.12", model: "Hikvision DS-2CD2386G2", resolution: "4K", location: "Reception Counter - Front" } },
+        { id: "cam-f1-3", name: "Coffee Shop Camera", type: "camera", status: "up", x: 190, y: 530, parent: "access-f1",
+          details: { ip: "10.10.20.13", model: "Hikvision DS-2CD2386G2", resolution: "4K", location: "Coffee Shop - Counter Area" } },
+        { id: "ap-f1-1", name: "Lobby AP", type: "ap", status: "up", x: 80, y: 580, parent: "access-f1",
+          details: { ip: "10.10.30.11", model: "Cisco Catalyst 9120AXI", ssid: "Sapphire-Staff", location: "Lobby Ceiling - Center" } },
+        
+        // Floor 2 - Marketing & Sales
+        { id: "dist-f2", name: "Dist-SW-F2", type: "distribution", status: "up", x: 350, y: 320, floor: "Floor 2", location: "East Side - Marketing Dept",
+          details: { ip: "10.10.10.12", model: "Cisco Catalyst 9200-24P", uplink: "Core-SW-01", devices: "3 Cameras, 3 APs, 20 Workstations" } },
+        { id: "access-f2", name: "Access-F2", type: "access", status: "up", x: 350, y: 450, parent: "dist-f2",
+          details: { ip: "10.10.50.12", model: "Cisco Catalyst 9200-24P", location: "Floor 2 - East IDF", ports_used: 20, ports_total: 24 } },
+        { id: "cam-f2-1", name: "Marketing Camera", type: "camera", status: "up", x: 290, y: 530, parent: "access-f2",
+          details: { ip: "10.10.20.21", model: "Hikvision DS-2CD2386G2", resolution: "4K", location: "Marketing Area - South Wall" } },
+        { id: "cam-f2-2", name: "Sales Camera", type: "camera", status: "up", x: 360, y: 530, parent: "access-f2",
+          details: { ip: "10.10.20.22", model: "Hikvision DS-2CD2386G2", resolution: "4K", location: "Sales Area - North Wall" } },
+        { id: "ap-f2-1", name: "Sales AP", type: "ap", status: "up", x: 320, y: 580, parent: "access-f2",
+          details: { ip: "10.10.30.12", model: "Cisco Catalyst 9120AXI", ssid: "Sapphire-Staff", location: "Sales Area - Ceiling" } },
+        
+        // Floor 3 - Finance & HR
+        { id: "dist-f3", name: "Dist-SW-F3", type: "distribution", status: "up", x: 550, y: 320, floor: "Floor 3", location: "Center - Finance Dept",
+          details: { ip: "10.10.10.13", model: "Cisco Catalyst 9200-24P", uplink: "Core-SW-01", devices: "3 Cameras, 3 APs, 25 Workstations" } },
+        { id: "access-f3", name: "Access-F3", type: "access", status: "up", x: 550, y: 450, parent: "dist-f3",
+          details: { ip: "10.10.50.13", model: "Cisco Catalyst 9200-24P", location: "Floor 3 - Center IDF", ports_used: 22, ports_total: 24 } },
+        { id: "cam-f3-1", name: "Finance Camera", type: "camera", status: "up", x: 510, y: 530, parent: "access-f3",
+          details: { ip: "10.10.20.31", model: "Hikvision DS-2CD2386G2", resolution: "4K", location: "Finance Area - Security Zone" } },
+        { id: "ap-f3-1", name: "HR AP", type: "ap", status: "up", x: 540, y: 580, parent: "access-f3",
+          details: { ip: "10.10.30.13", model: "Cisco Catalyst 9120AXI", ssid: "Sapphire-Staff", location: "HR Department - Ceiling" } },
+        
+        // Floor 4 - IT Department
+        { id: "dist-f4", name: "Dist-SW-F4", type: "distribution", status: "up", x: 750, y: 320, floor: "Floor 4", location: "North Side - IT Dept",
+          details: { ip: "10.10.10.14", model: "Cisco Catalyst 9200-24P", uplink: "Core-SW-01", devices: "4 Cameras, 4 APs, 30 Workstations" } },
+        { id: "access-f4", name: "Access-F4", type: "access", status: "up", x: 750, y: 450, parent: "dist-f4",
+          details: { ip: "10.10.50.14", model: "Cisco Catalyst 9200-24P", location: "Floor 4 - North IDF", ports_used: 28, ports_total: 24 } },
+        { id: "cam-f4-1", name: "IT Lab Camera", type: "camera", status: "up", x: 710, y: 530, parent: "access-f4",
+          details: { ip: "10.10.20.41", model: "Hikvision DS-2CD2386G2", resolution: "4K", location: "IT Lab - Server Room Entrance" } },
+        { id: "cam-f4-2", name: "NOC Camera", type: "camera", status: "up", x: 780, y: 530, parent: "access-f4",
+          details: { ip: "10.10.20.42", model: "Hikvision DS-2CD2386G2", resolution: "4K", location: "NOC - Monitoring Station" } },
+        { id: "ap-f4-1", name: "IT AP", type: "ap", status: "up", x: 730, y: 580, parent: "access-f4",
+          details: { ip: "10.10.30.14", model: "Cisco Catalyst 9130AXI", ssid: "Sapphire-Staff", location: "IT Department - Ceiling" } },
+        
+        // Floor 5 - Executive
+        { id: "dist-f5", name: "Dist-SW-F5", type: "distribution", status: "up", x: 950, y: 320, floor: "Floor 5", location: "South Side - Executive",
+          details: { ip: "10.10.10.15", model: "Cisco Catalyst 9200-24P", uplink: "Core-SW-01", devices: "3 Cameras, 4 APs, 20 Workstations" } },
+        { id: "access-f5", name: "Access-F5", type: "access", status: "up", x: 950, y: 450, parent: "dist-f5",
+          details: { ip: "10.10.50.15", model: "Cisco Catalyst 9200-24P", location: "Floor 5 - South IDF", ports_used: 18, ports_total: 24 } },
+        { id: "cam-f5-1", name: "Board Room Camera", type: "camera", status: "up", x: 910, y: 530, parent: "access-f5",
+          details: { ip: "10.10.20.51", model: "Hikvision DS-2CD2386G2", resolution: "4K", location: "Board Room - Entrance" } },
+        { id: "ap-f5-1", name: "Executive AP", type: "ap", status: "up", x: 940, y: 580, parent: "access-f5",
+          details: { ip: "10.10.30.15", model: "Cisco Catalyst 9130AXI", ssid: "Sapphire-Executive", location: "Executive Floor - Ceiling" } },
+        
+        // Basement - Control Room
+        { id: "dist-b1", name: "Dist-SW-B1", type: "distribution", status: "up", x: 1150, y: 320, floor: "Basement", location: "Control Room",
+          details: { ip: "10.10.10.16", model: "Cisco Catalyst 9200-24P", uplink: "Core-SW-01", devices: "4 Cameras, 2 APs, 8 Workstations" } },
+        { id: "access-b1", name: "Access-B1", type: "access", status: "up", x: 1150, y: 450, parent: "dist-b1",
+          details: { ip: "10.10.60.11", model: "Cisco Catalyst 9200-24P", location: "Control Room - Security", ports_used: 12, ports_total: 24 } },
+        { id: "cam-b1-1", name: "Parking Camera", type: "camera", status: "up", x: 1110, y: 530, parent: "access-b1",
+          details: { ip: "10.10.20.61", model: "Hikvision DS-2CD2386G2", resolution: "4K", location: "Parking Area - Section A" } },
+        { id: "nvr", name: "NVR-01", type: "firewall", status: "up", x: 1190, y: 530, parent: "access-b1",
+          details: { ip: "10.10.60.10", model: "Hikvision DS-9632NI-I8", storage: "48TB RAID 10", retention: "30 days", location: "Control Room - Rack 1" } }
+    ];
+
+    // Animation particles
+    let particles = [];
+    let animationId = null;
+
+    function drawNetwork() {
+        const canvas = document.getElementById('networkCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw building background
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw floor separators
+        ctx.beginPath();
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([10, 10]);
+        
+        // Floor lines
+        const floors = [280, 560, 840];
+        floors.forEach(y => {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
+        });
+        
+        ctx.setLineDash([]);
+        
+        // Draw floor labels
+        ctx.font = "bold 14px 'Segoe UI'";
+        ctx.fillStyle = "#94a3b8";
+        ctx.fillText("Core Layer", 20, 40);
+        ctx.fillText("Distribution Layer", 20, 280);
+        ctx.fillText("Access Layer", 20, 560);
+        
+        // Draw connections
+        devices.forEach(device => {
+            if (device.parent) {
+                const parent = devices.find(d => d.id === device.parent);
+                if (parent) {
+                    ctx.beginPath();
+                    ctx.moveTo(parent.x, parent.y);
+                    ctx.lineTo(device.x, device.y);
+                    ctx.strokeStyle = device.status === 'up' ? '#4ade80' : '#ef4444';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
+        });
+        
+        // Draw core connections
+        const core = devices.find(d => d.id === 'core');
+        const distributions = devices.filter(d => d.type === 'distribution');
+        distributions.forEach(dist => {
+            ctx.beginPath();
+            ctx.moveTo(core.x, core.y);
+            ctx.lineTo(dist.x, dist.y);
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        });
+        
+        // Draw devices
+        devices.forEach(device => {
+            let color, icon;
+            switch(device.type) {
+                case 'core': color = '#dc3545'; icon = '⚡'; break;
+                case 'distribution': color = '#fd7e14'; icon = '🔄'; break;
+                case 'access': color = '#28a745'; icon = '🔌'; break;
+                case 'camera': color = '#17a2b8'; icon = '📷'; break;
+                case 'ap': color = '#ffc107'; icon = '📶'; break;
+                default: color = '#6c757d'; icon = '🌐';
+            }
+            
+            // Draw glow for active devices
+            if (device.status === 'up') {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = color;
+            } else {
+                ctx.shadowBlur = 0;
+            }
+            
+            // Draw circle
+            ctx.beginPath();
+            ctx.arc(device.x, device.y, 22, 0, 2 * Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw icon
+            ctx.font = "18px 'Segoe UI'";
+            ctx.fillStyle = 'white';
+            ctx.shadowBlur = 0;
+            ctx.fillText(icon, device.x - 9, device.y + 7);
+            
+            // Draw name
+            ctx.font = "9px 'Segoe UI'";
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillText(device.name, device.x - 25, device.y + 30);
+            
+            // Draw status indicator
+            ctx.beginPath();
+            ctx.arc(device.x + 15, device.y - 15, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = device.status === 'up' ? '#28a745' : '#dc3545';
+            ctx.fill();
+            
+            // Draw IP address for network devices
+            if (device.details && device.details.ip) {
+                ctx.font = "7px monospace";
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillText(device.details.ip, device.x - 30, device.y - 15);
+            }
+        });
+        
+        // Draw animated particles (data packets)
+        drawParticles(ctx);
+        
+        animationId = requestAnimationFrame(() => drawNetwork());
+    }
+    
+    // Animated particles
+    let particleCounter = 0;
+    
+    function drawParticles(ctx) {
+        // Add new particles
+        particleCounter++;
+        if (particleCounter % 30 === 0) {
+            const devicesList = devices.filter(d => d.status === 'up' && d.type !== 'camera');
+            if (devicesList.length > 1) {
+                const start = devicesList[Math.floor(Math.random() * devicesList.length)];
+                const end = devicesList[Math.floor(Math.random() * devicesList.length)];
+                if (start !== end) {
+                    particles.push({
+                        start: start,
+                        end: end,
+                        progress: 0,
+                        speed: 0.02 + Math.random() * 0.02
+                    });
+                }
+            }
+        }
+        
+        // Update and draw particles
+        for (let i = particles.length-1; i >= 0; i--) {
+            const p = particles[i];
+            p.progress += p.speed;
+            
+            if (p.progress >= 1) {
+                particles.splice(i,1);
+                continue;
+            }
+            
+            const x = p.start.x + (p.end.x - p.start.x) * p.progress;
+            const y = p.start.y + (p.end.y - p.start.y) * p.progress;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffd700';
+            ctx.fill();
+            
+            // Trail effect
+            ctx.beginPath();
+            ctx.arc(x-2, y-2, 2, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffd700';
+            ctx.fill();
+        }
+    }
+    
+    // Update statistics
+    function updateStats() {
+        const total = devices.length;
+        const active = devices.filter(d => d.status === 'up').length;
+        document.getElementById('totalDevices').textContent = total;
+        document.getElementById('activeDevices').textContent = active;
+        
+        const deviceList = document.getElementById('deviceList');
+        deviceList.innerHTML = devices.map(d => `
+            <div class="device-item" style="border-left-color: ${d.status === 'up' ? '#28a745' : '#dc3545'}" onclick="showDeviceModal('${d.id}')">
+                <div><strong>${d.name}</strong></div>
+                <div style="font-size: 11px;">${d.type.toUpperCase()} | ${d.floor || 'Basement'}</div>
+                <div><span class="device-status ${d.status === 'up' ? 'status-up' : 'status-down'}">${d.status === 'up' ? '● Active' : '● Down'}</span></div>
+            </div>
+        `).join('');
+    }
+    
+    // Show device modal
+    function showDeviceModal(deviceId) {
+        const device = devices.find(d => d.id === deviceId);
+        if (!device) return;
+        
+        const modal = document.getElementById('deviceModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        
+        modalTitle.textContent = device.name;
+        
+        let html = `
+            <div class="info-row"><div class="info-label">Type:</div><div class="info-value">${device.type.toUpperCase()}</div></div>
+            <div class="info-row"><div class="info-label">Status:</div><div class="info-value"><span style="color: ${device.status === 'up' ? '#28a745' : '#dc3545'}">${device.status === 'up' ? 'Active' : 'Down'}</span></div></div>
+        `;
+        
+        if (device.details) {
+            Object.entries(device.details).forEach(([key, value]) => {
+                html += `<div class="info-row"><div class="info-label">${key.charAt(0).toUpperCase() + key.slice(1)}:</div><div class="info-value">${value}</div></div>`;
+            });
+        }
+        
+        if (device.floor) {
+            html += `<div class="info-row"><div class="info-label">Location:</div><div class="info-value">${device.floor} - ${device.location || 'Standard'}</div></div>`;
+        }
+        
+        modalBody.innerHTML = html;
+        modal.style.display = 'flex';
+    }
+    
+    function closeModal() {
+        document.getElementById('deviceModal').style.display = 'none';
+    }
+    
+    // Canvas click handler
+    const canvas = document.getElementById('networkCanvas');
+    canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+        
+        // Find clicked device
+        for (const device of devices) {
+            const dx = device.x - x;
+            const dy = device.y - y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 30) {
+                showDeviceModal(device.id);
+                break;
+            }
+        }
+    });
+    
+    // Start animation
+    updateStats();
+    drawNetwork();
+    
+    window.onclick = (event) => {
+        const modal = document.getElementById('deviceModal');
+        if (event.target === modal) closeModal();
+    };
+</script>
+</body>
+</html>

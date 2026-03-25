@@ -1,0 +1,204 @@
+!
+! ============================================================================
+! SAPPHIRE TOWER - ACCESS SWITCH CONFIGURATION
+! Device: Access-SW-F5
+! Model: Cisco Catalyst 9200-24P
+! Location: Floor 5 - South Side IDF (Room 5-501)
+! Rack: F1 | Uplink: Dist-SW-F5 (Te1/0/1)
+! Network Engineer: Israr Sadaq
+! ============================================================================
+
+hostname Access-SW-F5
+enable secret Sapphire@2026
+
+! ============================================================================
+! VLAN CONFIGURATION
+! ============================================================================
+vlan 10
+ name Management
+!
+vlan 20
+ name CCTV
+!
+vlan 30
+ name WiFi-Staff
+!
+vlan 40
+ name WiFi-Guest
+!
+vlan 50
+ name Data
+
+! ============================================================================
+! UPLINK TO DISTRIBUTION SWITCH
+! ============================================================================
+interface TenGigabitEthernet1/0/1
+ description Uplink to Dist-SW-F5 (10Gbps Fiber)
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+ switchport trunk native vlan 10
+ no shutdown
+
+! ============================================================================
+! CAMERA PORTS (PoE) - EXECUTIVE SECURITY
+! ============================================================================
+interface GigabitEthernet1/0/2
+ description Camera - Executive Hallway (East Side)
+ switchport mode access
+ switchport access vlan 20
+ spanning-tree portfast
+ power inline auto
+ no shutdown
+!
+interface GigabitEthernet1/0/3
+ description Camera - CEO Office Entrance
+ switchport mode access
+ switchport access vlan 20
+ spanning-tree portfast
+ power inline auto
+ no shutdown
+!
+interface GigabitEthernet1/0/4
+ description Camera - Board Room Entrance
+ switchport mode access
+ switchport access vlan 20
+ spanning-tree portfast
+ power inline auto
+ no shutdown
+
+! ============================================================================
+! ACCESS POINT PORTS (PoE) - EXECUTIVE WIFI (HIGH SECURITY)
+! ============================================================================
+interface GigabitEthernet1/0/5
+ description AP - Executive Lounge
+ switchport mode trunk
+ switchport trunk allowed vlan 30
+ spanning-tree portfast
+ power inline auto
+ no shutdown
+!
+interface GigabitEthernet1/0/6
+ description AP - CEO Office
+ switchport mode trunk
+ switchport trunk allowed vlan 30
+ spanning-tree portfast
+ power inline auto
+ no shutdown
+!
+interface GigabitEthernet1/0/7
+ description AP - Board Room
+ switchport mode trunk
+ switchport trunk allowed vlan 30
+ spanning-tree portfast
+ power inline auto
+ no shutdown
+!
+interface GigabitEthernet1/0/8
+ description AP - Conference Room
+ switchport mode trunk
+ switchport trunk allowed vlan 30,40
+ spanning-tree portfast
+ power inline auto
+ no shutdown
+
+! ============================================================================
+! EXECUTIVE WORKSTATION PORTS - VLAN 50 (HIGH PRIORITY QoS)
+! ============================================================================
+interface GigabitEthernet1/0/9
+ description CEO Workstation
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ no shutdown
+!
+interface GigabitEthernet1/0/10
+ description COO Workstation
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ no shutdown
+!
+interface range GigabitEthernet1/0/11-15
+ description Executive Staff Workstations
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ no shutdown
+!
+interface range GigabitEthernet1/0/16-20
+ description Board Room Conference PCs
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ no shutdown
+!
+interface range GigabitEthernet1/0/21-24
+ description Administrative Staff
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ no shutdown
+!
+interface range GigabitEthernet1/0/25-48
+ description Spare Executive Ports
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ no shutdown
+
+! ============================================================================
+! QoS FOR EXECUTIVE VLAN (PRIORITY TRAFFIC)
+! ============================================================================
+class-map match-all EXECUTIVE_TRAFFIC
+ match access-group name EXECUTIVE_ACL
+!
+policy-map EXECUTIVE_QOS
+ class EXECUTIVE_TRAFFIC
+  set dscp ef
+  priority level 1
+!
+ip access-list extended EXECUTIVE_ACL
+ permit ip 10.10.50.0 0.0.0.255 any
+!
+interface Vlan50
+ service-policy input EXECUTIVE_QOS
+
+! ============================================================================
+! PoE STATUS MONITORING
+! ============================================================================
+power inline consumption default 30000
+!
+interface range Gi1/0/2-8
+ power inline auto max 30000
+
+! ============================================================================
+! MANAGEMENT INTERFACE
+! ============================================================================
+interface Vlan10
+ ip address 10.10.10.105 255.255.255.0
+!
+ip default-gateway 10.10.10.1
+
+! ============================================================================
+! SSH CONFIGURATION
+! ============================================================================
+ip domain-name sapphire.local
+crypto key generate rsa modulus 2048
+!
+username admin privilege 15 secret Sapphire@2026
+!
+line vty 0 15
+ transport input ssh
+ login local
+ exec-timeout 15 0
+
+! ============================================================================
+! SNMP MONITORING
+! ============================================================================
+snmp-server community Sapphire_RO RO
+snmp-server location Floor 5 - South IDF
+snmp-server contact israrsadaq057@gmail.com
+
+! Save Configuration
+end
+write memory

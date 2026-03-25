@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sapphire Tower - IP Addressing & VLAN Design | Israr Sadaq</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Consolas', monospace;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 span {
+            color: #ffd700;
+        }
+
+        .ip-summary {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .ip-stat {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        /* VLAN Table */
+        .vlan-section {
+            background: white;
+            border-radius: 24px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 15px 25px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+        }
+
+        .vlan-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .vlan-table th {
+            background: #f1f5f9;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .vlan-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        .vlan-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .vlan-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .vlan-10 { background: #dc2626; color: white; }
+        .vlan-20 { background: #06b6d4; color: white; }
+        .vlan-30 { background: #22c55e; color: white; }
+        .vlan-40 { background: #f59e0b; color: white; }
+        .vlan-50 { background: #8b5cf6; color: white; }
+        .vlan-60 { background: #ec489a; color: white; }
+        .vlan-70 { background: #14b8a6; color: white; }
+        .vlan-80 { background: #6366f1; color: white; }
+
+        /* Floor IP Grid */
+        .floor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .floor-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .floor-header {
+            padding: 15px 20px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .floor-1 { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+        .floor-2 { background: linear-gradient(135deg, #f97316, #ea580c); }
+        .floor-3 { background: linear-gradient(135deg, #eab308, #ca8a04); }
+        .floor-4 { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .floor-5 { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .basement { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+        .floor-body {
+            padding: 15px;
+        }
+
+        .device-ip {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .device-ip .device-name {
+            font-weight: bold;
+            color: #1e293b;
+        }
+
+        .device-ip .ip {
+            color: #0891b2;
+            margin-left: 10px;
+        }
+
+        .device-ip .role {
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .summary-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .summary-label {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            padding: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🏢 SAPPHIRE TOWER - <span>IP ADDRESSING & VLAN DESIGN</span></h1>
+        <p>Shahrah-e-Faisal, Karachi, Pakistan | Complete IP Allocation Scheme</p>
+        <div class="ip-summary">
+            <div class="ip-stat">📡 Total IPs Used: 312</div>
+            <div class="ip-stat">🌐 VLANs: 8</div>
+            <div class="ip-stat">🔌 Network Devices: 45</div>
+            <div class="ip-stat">📷 End Devices: 200+</div>
+        </div>
+        <div style="margin-top: 15px;">Network Engineer: Israr Sadaq | CCNA | CCNP | Berlin, Germany</div>
+    </div>
+
+    <!-- VLAN Summary Table -->
+    <div class="vlan-section">
+        <div class="section-title">
+            <i>🔀</i> VLAN CONFIGURATION
+        </div>
+        <table class="vlan-table">
+            <thead>
+                <tr>
+                    <th>VLAN ID</th>
+                    <th>Name</th>
+                    <th>Subnet</th>
+                    <th>Gateway</th>
+                    <th>DHCP Range</th>
+                    <th>Purpose</th>
+                    <th>Devices</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="vlan-badge vlan-10">VLAN 10</span></td>
+                    <td><strong>Management</strong></td>
+                    <td>10.10.10.0/24</td>
+                    <td>10.10.10.1</td>
+                    <td>Static Only</td>
+                    <td>Network Device Management</td>
+                    <td>Switches, Firewall, Router</td>
+                </tr>
+                <tr>
+                    <td><span class="vlan-badge vlan-20">VLAN 20</span></td>
+                    <td><strong>CCTV</strong></td>
+                    <td>10.10.20.0/24</td>
+                    <td>10.10.20.1</td>
+                    <td>Static (10.10.20.11-64)</td>
+                    <td>Security Cameras</td>
+                    <td>24 IP Cameras</td>
+                </tr>
+                <tr>
+                    <td><span class="vlan-badge vlan-30">VLAN 30</span></td>
+                    <td><strong>WiFi-Staff</strong></td>
+                    <td>10.10.30.0/24</td>
+                    <td>10.10.30.1</td>
+                    <td>10.10.30.100-200</td>
+                    <td>Employee WiFi</td>
+                    <td>Staff Laptops, Phones</td>
+                </tr>
+                <tr>
+                    <td><span class="vlan-badge vlan-40">VLAN 40</span></td>
+                    <td><strong>WiFi-Guest</strong></td>
+                    <td>172.16.40.0/24</td>
+                    <td>172.16.40.1</td>
+                    <td>172.16.40.50-200</td>
+                    <td>Guest WiFi (Internet Only)</td>
+                    <td>Visitors, Retail Customers</td>
+                </tr>
+                <tr>
+                    <td><span class="vlan-badge vlan-50">VLAN 50</span></td>
+                    <td><strong>Data</strong></td>
+                    <td>10.10.50.0/24</td>
+                    <td>10.10.50.1</td>
+                    <td>10.10.50.100-250</td>
+                    <td>User Workstations</td>
+                    <td>160+ Employee PCs</td>
+                </tr>
+                <tr>
+                    <td><span class="vlan-badge vlan-60">VLAN 60</span></td>
+                    <td><strong>Control-Room</strong></td>
+                    <td>10.10.60.0/24</td>
+                    <td>10.10.60.1</td>
+                    <td>Static (10.10.60.10-20)</td>
+                    <td>Security Operations</td>
+                    <td>NVR, Workstations, Monitor Wall</td>
+                </tr>
+                <tr>
+                    <td><span class="vlan-badge vlan-70">VLAN 70</span></td>
+                    <td><strong>VoIP</strong></td>
+                    <td>10.10.70.0/24</td>
+                    <td>10.10.70.1</td>
+                    <td>10.10.70.100-200</td>
+                    <td>Voice (Future)</td>
+                    <td>IP Phones</td>
+                </tr>
+                <tr>
+                    <td><span class="vlan-badge vlan-80">VLAN 80</span></td>
+                    <td><strong>Server</strong></td>
+                    <td>10.10.80.0/24</td>
+                    <td>10.10.80.1</td>
+                    <td>Static Only</td>
+                    <td>Data Center</td>
+                    <td>Servers, NOC</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="summary-number">8</div>
+            <div class="summary-label">VLANs</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-number">13</div>
+            <div class="summary-label">Switches</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-number">24</div>
+            <div class="summary-label">Cameras</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-number">20</div>
+            <div class="summary-label">Access Points</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-number">160+</div>
+            <div class="summary-label">Workstations</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-number">312</div>
+            <div class="summary-label">Total Ports</div>
+        </div>
+    </div>
+
+    <!-- Floor-wise IP Distribution -->
+    <div class="vlan-section">
+        <div class="section-title">
+            <i>📍</i> FLOOR-WISE IP DISTRIBUTION
+        </div>
+    </div>
+
+    <div class="floor-grid">
+        <!-- Floor 1 -->
+        <div class="floor-card">
+            <div class="floor-header floor-1">
+                📍 FLOOR 1 - Reception & Retail
+            </div>
+            <div class="floor-body">
+                <div class="device-ip">
+                    <span class="device-name">📷 Cameras (4):</span>
+                    <span class="ip">10.10.20.11-14</span>
+                    <div class="role">Lobby | Reception | Coffee Shop | Retail</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">📶 Access Points (4):</span>
+                    <span class="ip">10.10.30.11-14</span>
+                    <div class="role">Cisco 9120AXI | SSID: Sapphire-Staff</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">💻 Workstations (15):</span>
+                    <span class="ip">10.10.50.100-114</span>
+                    <div class="role">Reception, Retail Staff, Coffee Shop</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🔌 Distribution Switch:</span>
+                    <span class="ip">10.10.10.11</span>
+                    <div class="role">Dist-SW-F1 (Cisco 9200-24P)</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🔌 Access Switch:</span>
+                    <span class="ip">10.10.50.11</span>
+                    <div class="role">Access-F1 (18/24 ports used)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floor 2 -->
+        <div class="floor-card">
+            <div class="floor-header floor-2">
+                📍 FLOOR 2 - Marketing & Sales
+            </div>
+            <div class="floor-body">
+                <div class="device-ip">
+                    <span class="device-name">📷 Cameras (3):</span>
+                    <span class="ip">10.10.20.21-23</span>
+                    <div class="role">Marketing | Sales | Elevator</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">📶 Access Points (3):</span>
+                    <span class="ip">10.10.30.21-23</span>
+                    <div class="role">Cisco 9120AXI | SSID: Sapphire-Staff</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">💻 Workstations (20):</span>
+                    <span class="ip">10.10.50.115-134</span>
+                    <div class="role">Marketing, Sales Teams</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🔌 Distribution Switch:</span>
+                    <span class="ip">10.10.10.12</span>
+                    <div class="role">Dist-SW-F2 (Cisco 9200-24P)</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🔌 Access Switch:</span>
+                    <span class="ip">10.10.50.12</span>
+                    <div class="role">Access-F2 (20/24 ports used)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floor 3 -->
+        <div class="floor-card">
+            <div class="floor-header floor-3">
+                📍 FLOOR 3 - Finance & HR
+            </div>
+            <div class="floor-body">
+                <div class="device-ip">
+                    <span class="device-name">📷 Cameras (3):</span>
+                    <span class="ip">10.10.20.31-33</span>
+                    <div class="role">Finance | HR | Elevator</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">📶 Access Points (3):</span>
+                    <span class="ip">10.10.30.31-33</span>
+                    <div class="role">Cisco 9120AXI | SSID: Sapphire-Staff</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">💻 Workstations (25):</span>
+                    <span class="ip">10.10.50.135-159</span>
+                    <div class="role">Finance, HR, Training Room</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🔌 Distribution Switch:</span>
+                    <span class="ip">10.10.10.13</span>
+                    <div class="role">Dist-SW-F3 (Cisco 9200-24P)</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🔌 Access Switch:</span>
+                    <span class="ip">10.10.50.13</span>
+                    <div class="role">Access-F3 (22/24 ports used)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floor 4 -->
+        <div class="floor-card">
+            <div class="floor-header floor-4">
+                📍 FLOOR 4 - IT Department
+            </div>
+            <div class="floor-body">
+                <div class="device-ip">
+                    <span class="device-name">📷 Cameras (4):</span>
+                    <span class="ip">10.10.20.41-44</span>
+                    <div class="role">IT Lab | NOC | Server Room | Elevator</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">📶 Access Points (4):</span>
+                    <span class="ip">10.10.30.41-44</span>
+                    <div class="role">Cisco 9130AXI | Tri-band</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">💻 Workstations (30):</span>
+                    <span class="ip">10.10.50.160-189</span>
+                    <div class="role">IT Staff, Developers, NOC</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🔌 Distribution Switch:</span>
+                    <span class="ip">10.10.10.14</span>
+                    <div class="role">Dist-SW-F4 (Cisco 9200-24P)</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🔌 Access Switch:</span>
+                    <span class="ip">10.10.50.14</span>
+                    <div class="role">Access-F4 (28/24 ports used)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floor 5 -->
+        <div class="floor-card">
+            <div class="floor-header floor-5">
+                📍 FLOOR 5 - Executive Suites
+            </div>
+            <div class="floor-body">
+                <div class="device-ip">
+                    <span class="device-name">📷 Cameras (3):</span>
+                    <span class="ip">10.10.20.51-53</span>
+                    <div class="role">Executive | Board Room | Elevator</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">📶 Access Points (4):</span>
+                    <span class="ip">10.10.30.51-54</span>
+                    <div class="role">Cisco 9130AXI | SSID: Sapphire-Executive</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">💻 Workstations (20):</span>
+                    <span class="ip">10.10.50.190-209</span>
+                    <div class="role">CEO, COO, Executive Staff</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🔌 Distribution Switch:</span>
+                    <span class="ip">10.10.10.15</span>
+                    <div class="role">Dist-SW-F5 (Cisco 9200-24P)</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🔌 Access Switch:</span>
+                    <span class="ip">10.10.50.15</span>
+                    <div class="role">Access-F5 (18/24 ports used)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Basement -->
+        <div class="floor-card">
+            <div class="floor-header basement">
+                📍 BASEMENT - Control Room & Parking
+            </div>
+            <div class="floor-body">
+                <div class="device-ip">
+                    <span class="device-name">📷 Cameras (4):</span>
+                    <span class="ip">10.10.20.61-64</span>
+                    <div class="role">Parking A/B | Security Office | Elevator</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">📶 Access Points (2):</span>
+                    <span class="ip">10.10.30.61-62</span>
+                    <div class="role">Cisco 9120AXI | SSID: Sapphire-Staff</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">💻 Workstations (8):</span>
+                    <span class="ip">10.10.50.210-217</span>
+                    <div class="role">Security Staff, Control Room</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🎮 NVR-01:</span>
+                    <span class="ip">10.10.60.10</span>
+                    <div class="role">Hikvision 32-Channel NVR | 48TB Storage</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🖥️ Security Workstations:</span>
+                    <span class="ip">10.10.60.11-12</span>
+                    <div class="role">Security Operator Stations</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🔌 Distribution Switch:</span>
+                    <span class="ip">10.10.10.16</span>
+                    <div class="role">Dist-SW-B1 (Cisco 9200-24P)</div>
+                </div>
+                <div class="device-ip">
+                    <span class="device-name">🔌 Access Switch:</span>
+                    <span class="ip">10.10.60.11</span>
+                    <div class="role">Access-B1 (12/24 ports used)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Layer IPs -->
+    <div class="vlan-section">
+        <div class="section-title">
+            <i>⚡</i> CORE LAYER IP ASSIGNMENTS (Basement - Server Room)
+        </div>
+        <table class="vlan-table">
+            <thead>
+                <tr><th>Device</th><th>Model</th><th>Management IP</th><th>VLAN</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>Internet Gateway</strong></td><td>PTCL Flash Fiber</td><td>203.124.30.1</td><td>-</td><td>ISP Gateway</td></tr>
+                <tr><td><strong>Firewall-01</strong></td><td>Cisco Firepower 1120</td><td>10.10.10.254</td><td>10</td><td>NGFW with IPS/IDS</td></tr>
+                <tr><td><strong>Core-SW-01</strong></td><td>Cisco Catalyst 9300-48P</td><td>10.10.10.1</td><td>10</td><td>Core Switch with PoE+</td></tr>
+                <tr><td><strong>NVR-01</strong></td><td>Hikvision DS-9632NI-I8</td><td>10.10.60.10</td><td>60</td><td>48TB RAID 10 Storage</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>© 2026 Israr Sadaq | Network Engineer | CCNA | CCNP | Berlin, Germany</p>
+        <p>📧 israrsadaq057@gmail.com | 📱 +49 152525267799</p>
+        <p>📡 All IP addresses are static assigned | DHCP for user devices only | VLAN segmentation for security</p>
+    </div>
+</div>
+</body>
+</html>

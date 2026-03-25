@@ -1,0 +1,502 @@
+!
+! ============================================================================
+! SAPPHIRE TOWER - ENTERPRISE FIREWALL CONFIGURATION
+! Device: Firewall-01 (Cisco Firepower 1120)
+! Location: Basement - Server Room (MDF)
+! Network Engineer: Israr Sadaq
+! Date: March 2026
+! Security Level: HIGH
+! ============================================================================
+
+hostname Firewall-01
+enable password Sapphire@2026
+enable secret Sapphire@2026
+
+! ============================================================================
+! INTERFACE CONFIGURATION
+! ============================================================================
+interface GigabitEthernet0/0
+ nameif outside
+ security-level 0
+ ip address 203.124.30.2 255.255.255.248
+ description ███ INTERNET CONNECTION - PTCL Flash Fiber 100Mbps ███
+ no shutdown
+!
+
+interface GigabitEthernet0/1
+ nameif inside
+ security-level 100
+ ip address 10.10.10.254 255.255.255.0
+ description ███ INTERNAL NETWORK - Core Switch Connection ███
+ no shutdown
+!
+
+interface GigabitEthernet0/2
+ nameif dmz
+ security-level 50
+ ip address 192.168.100.1 255.255.255.0
+ description ███ DMZ ZONE - Web Servers, Mail Servers ███
+ no shutdown
+!
+
+interface GigabitEthernet0/3
+ nameif management
+ security-level 100
+ ip address 10.10.10.253 255.255.255.0
+ description ███ MANAGEMENT INTERFACE - IT Admin Access Only ███
+ no shutdown
+!
+
+! ============================================================================
+! OBJECT GROUPS (Network Objects)
+! ============================================================================
+! --- INTERNAL NETWORKS ---
+object-group network INTERNAL_ALL
+ description All Internal Networks
+ network-object 10.10.0.0 255.255.0.0
+ network-object 192.168.100.0 255.255.255.0
+!
+
+object-group network CCTV_NETWORK
+ description Security Camera Network
+ network-object 10.10.20.0 255.255.255.0
+!
+
+object-group network WIFI_STAFF
+ description Staff WiFi Network
+ network-object 10.10.30.0 255.255.255.0
+!
+
+object-group network WIFI_GUEST
+ description Guest WiFi Network
+ network-object 172.16.40.0 255.255.255.0
+!
+
+object-group network DATA_VLAN
+ description User Workstations
+ network-object 10.10.50.0 255.255.255.0
+!
+
+object-group network CONTROL_ROOM
+ description Security Control Room
+ network-object 10.10.60.0 255.255.255.0
+!
+
+object-group network SERVER_VLAN
+ description Data Center Servers
+ network-object 10.10.80.0 255.255.255.0
+!
+
+object-group network MANAGEMENT_NETWORK
+ description Network Device Management
+ network-object 10.10.10.0 255.255.255.0
+!
+
+! --- DMZ SERVERS ---
+object-group network DMZ_SERVERS
+ description Public-facing Servers
+ network-object host 192.168.100.10
+ network-object host 192.168.100.11
+ network-object host 192.168.100.12
+!
+
+! --- CRITICAL INFRASTRUCTURE ---
+object-group network CRITICAL_DEVICES
+ description Critical Network Infrastructure
+ network-object host 10.10.10.1      ! Core Switch
+ network-object host 10.10.10.11     ! Dist-SW-F1
+ network-object host 10.10.10.12     ! Dist-SW-F2
+ network-object host 10.10.10.13     ! Dist-SW-F3
+ network-object host 10.10.10.14     ! Dist-SW-F4
+ network-object host 10.10.10.15     ! Dist-SW-F5
+ network-object host 10.10.10.16     ! Dist-SW-B1
+ network-object host 10.10.60.10     ! NVR
+!
+
+! --- ADMINISTRATOR IPs ---
+object-group network ADMIN_IPS
+ description Authorized Administrator IPs
+ network-object host 10.10.10.10     ! IT Admin PC
+ network-object host 10.10.50.100    ! IT Workstation 1
+ network-object host 10.10.50.101    ! IT Workstation 2
+ network-object host 10.10.60.11     ! Security Workstation 1
+ network-object host 10.10.60.12     ! Security Workstation 2
+!
+
+! --- BLOCKED MALICIOUS DOMAINS ---
+object-group network BLOCKED_DOMAINS
+ description Known Malicious Domains
+ network-object host malware-site.com
+ network-object host phishing-attempt.net
+ network-object host ransomware.org
+ network-object host gambling-site.com
+ network-object host torrent-site.org
+!
+
+! ============================================================================
+! ACCESS CONTROL LISTS (ACLs)
+! ============================================================================
+
+! ============================================================================
+! 1. INTERNET ACCESS POLICIES
+! ============================================================================
+! Allow Internal Networks to Internet
+access-list INSIDE_OUT extended permit ip object-group INTERNAL_ALL any
+!
+! Allow CCTV to NVR only (No Internet)
+access-list CCTV_IN extended permit ip object-group CCTV_NETWORK host 10.10.60.10
+access-list CCTV_IN extended deny ip object-group CCTV_NETWORK any
+!
+! Guest WiFi - Internet Only (No Internal Access)
+access-list GUEST_IN extended deny ip object-group WIFI_GUEST object-group INTERNAL_ALL
+access-list GUEST_IN extended permit ip object-group WIFI_GUEST any
+!
+! Staff WiFi - Full Access (Except Malicious Sites)
+access-list STAFF_WIFI_IN extended permit ip object-group WIFI_STAFF any
+
+! ============================================================================
+! 2. MANAGEMENT ACCESS (IT ONLY)
+! ============================================================================
+! SSH Access to Firewall (IT Only)
+access-list MGMT_SSH extended permit tcp object-group ADMIN_IPS host 10.10.10.254 eq 22
+!
+! HTTPS Access to Firewall (IT Only)
+access-list MGMT_HTTPS extended permit tcp object-group ADMIN_IPS host 10.10.10.254 eq 443
+!
+! SNMP Access (Monitoring Only)
+access-list MGMT_SNMP extended permit udp object-group ADMIN_IPS host 10.10.10.254 eq 161
+!
+! ICMP (Ping) - Allow for Monitoring
+access-list MGMT_ICMP extended permit icmp object-group ADMIN_IPS host 10.10.10.254
+
+! ============================================================================
+! 3. DMZ SECURITY POLICIES
+! ============================================================================
+! Allow HTTP/HTTPS to Web Server from Internet
+access-list DMZ_WEB_IN extended permit tcp any host 192.168.100.10 eq 80
+access-list DMZ_WEB_IN extended permit tcp any host 192.168.100.10 eq 443
+!
+! Allow SMTP to Mail Server from Internet
+access-list DMZ_MAIL_IN extended permit tcp any host 192.168.100.11 eq 25
+access-list DMZ_MAIL_IN extended permit tcp any host 192.168.100.11 eq 587
+!
+! Allow SQL from Internal to DB Server
+access-list DMZ_SQL_IN extended permit tcp object-group INTERNAL_ALL host 192.168.100.12 eq 1433
+!
+! Deny All Other DMZ Traffic
+access-list DMZ_DENY extended deny ip any any
+
+! ============================================================================
+! 4. ADVANCED SECURITY POLICIES
+! ============================================================================
+! Block Known Malicious Domains
+access-list BLOCK_MALWARE extended deny ip any object-group BLOCKED_DOMAINS
+!
+! Block Social Media during Work Hours (9AM-6PM)
+time-range WORK_HOURS
+ periodic weekdays 9:00 to 18:00
+!
+access-list BLOCK_SOCIAL_MEDIA extended deny tcp any any eq 80 time-range WORK_HOURS
+access-list BLOCK_SOCIAL_MEDIA extended deny tcp any any eq 443 time-range WORK_HOURS
+!
+! Block Streaming Sites (YouTube, Netflix) during Work Hours
+access-list BLOCK_STREAMING extended deny tcp any any eq 80 time-range WORK_HOURS
+access-list BLOCK_STREAMING extended deny tcp any any eq 443 time-range WORK_HOURS
+!
+! Block File Sharing (Torrent, P2P)
+access-list BLOCK_P2P extended deny tcp any any range 6881 6889
+access-list BLOCK_P2P extended deny udp any any range 6881 6889
+
+! ============================================================================
+! 5. THREAT PROTECTION POLICIES
+! ============================================================================
+! Block Port Scans
+access-list BLOCK_PORT_SCAN extended deny tcp any any flags RST
+!
+! Block Fragmented Packets (DoS Protection)
+access-list BLOCK_FRAGMENTS extended deny ip any any fragments
+!
+! Block ICMP Flood (Ping of Death)
+access-list BLOCK_ICMP_FLOOD extended deny icmp any any echo-reply
+!
+! Limit ICMP Rate
+icmp unreachable rate-limit 1 burst-size 1
+
+! ============================================================================
+! NAT CONFIGURATION
+! ============================================================================
+! Object for Internal Network
+object network INTERNAL_SUBNET
+ subnet 10.10.0.0 255.255.0.0
+!
+object network DMZ_SUBNET
+ subnet 192.168.100.0 255.255.255.0
+!
+! Dynamic NAT for Internal Users
+nat (inside,outside) source dynamic INTERNAL_SUBNET interface
+!
+! Static NAT for DMZ Web Server (Port 80,443)
+object network WEB_SERVER
+ host 192.168.100.10
+ nat (dmz,outside) static interface service tcp 80 80
+ nat (dmz,outside) static interface service tcp 443 443
+!
+! Static NAT for Mail Server
+object network MAIL_SERVER
+ host 192.168.100.11
+ nat (dmz,outside) static interface service tcp 25 25
+ nat (dmz,outside) static interface service tcp 587 587
+
+! ============================================================================
+! DEFAULT ROUTE
+! ============================================================================
+route outside 0.0.0.0 0.0.0.0 203.124.30.1
+
+! ============================================================================
+! DHCP CONFIGURATION (For DMZ)
+! ============================================================================
+dhcpd address 192.168.100.100-192.168.100.200 dmz
+dhcpd dns 8.8.8.8 8.8.4.4 interface dmz
+dhcpd enable dmz
+
+! ============================================================================
+! DNS CONFIGURATION
+! ============================================================================
+! DNS Servers for Internal Users
+dns domain-lookup inside
+dns server-group DefaultDNS
+ name-server 10.10.10.10
+ name-server 8.8.8.8
+ name-server 8.8.4.4
+!
+! DNS Doctoring (Split DNS)
+alias (inside) 10.10.80.10 192.168.100.10 255.255.255.255
+
+! ============================================================================
+! SSH ACCESS
+! ============================================================================
+ssh 10.10.10.0 255.255.255.0 inside
+ssh 10.10.60.0 255.255.255.0 inside
+ssh timeout 30
+ssh version 2
+
+! ============================================================================
+! AAA CONFIGURATION (Authentication, Authorization, Accounting)
+! ============================================================================
+aaa authentication ssh console LOCAL
+aaa authentication http console LOCAL
+aaa authentication enable console LOCAL
+!
+username admin password Sapphire@2026
+username admin privilege 15
+!
+username it_admin password ItAdmin@2026
+username it_admin privilege 15
+!
+username security_operator password Security@2026
+username security_operator privilege 10
+
+! ============================================================================
+! IPS/IDS CONFIGURATION (Intrusion Prevention)
+! ============================================================================
+! Enable IPS
+ips policy default-ips-policy
+ ips signature-definition default
+!
+class-map IPS_TRAFFIC
+ match any
+!
+policy-map IPS_POLICY
+ class IPS_TRAFFIC
+  ips inline fail-open
+!
+service-policy IPS_POLICY interface inside
+service-policy IPS_POLICY interface outside
+service-policy IPS_POLICY interface dmz
+
+! ============================================================================
+! VPN CONFIGURATION (Remote Access)
+! ============================================================================
+! IPSec VPN for Remote Employees
+crypto ipsec transform-set ESP-AES-SHA esp-aes-256 esp-sha-hmac
+crypto ipsec transform-set ESP-AES-SHA mode tunnel
+!
+crypto dynamic-map DYNAMIC_MAP 10 set transform-set ESP-AES-SHA
+crypto dynamic-map DYNAMIC_MAP 10 set reverse-route
+!
+crypto map VPN_MAP 10 ipsec-isakmp dynamic DYNAMIC_MAP
+crypto map VPN_MAP interface outside
+!
+! IKE Policies
+crypto ikev1 policy 10
+ authentication pre-share
+ encryption aes-256
+ hash sha
+ group 2
+ lifetime 86400
+!
+! VPN Group Policy
+group-policy VPN_GROUP internal
+group-policy VPN_GROUP attributes
+ dns-server value 10.10.10.10
+ vpn-tunnel-protocol ikev1
+ split-tunnel-policy tunnelspecified
+ split-tunnel-network-list value VPN_SPLIT_TUNNEL
+!
+! VPN User
+username remote_user password Remote@2026
+username remote_user attributes
+ vpn-group-policy VPN_GROUP
+!
+
+! ============================================================================
+! URL FILTERING
+! ============================================================================
+url-filter category block SocialNetworking
+url-filter category block StreamingMedia
+url-filter category block FileSharing
+url-filter category block Gambling
+url-filter category block AdultContent
+!
+url-filter default-action block
+
+! ============================================================================
+! APPLICATION CONTROL
+! ============================================================================
+policy-map type inspect app APP_POLICY
+ class application Facebook
+  drop
+ class application YouTube
+  drop
+ class application Netflix
+  drop
+ class application BitTorrent
+  drop
+ class class-default
+  pass
+!
+service-policy type inspect app APP_POLICY inside
+
+! ============================================================================
+! LOGGING & MONITORING
+! ============================================================================
+logging enable
+logging buffered informational
+logging trap informational
+logging host inside 10.10.60.20
+logging host inside 10.10.80.50
+!
+logging message 106001 1
+logging message 106002 1
+logging message 106006 1
+!
+! Syslog Severity Levels
+logging facility 22
+logging queue 1024
+
+! ============================================================================
+! SNMP MONITORING
+! ============================================================================
+snmp-server host inside 10.10.60.20 community Sapphire_RO
+snmp-server host inside 10.10.80.50 community Sapphire_RO
+snmp-server location Basement - Server Room
+snmp-server contact israrsadaq057@gmail.com
+snmp-server community Sapphire_RO RO
+snmp-server enable traps
+
+! ============================================================================
+! CONNECTION SETTINGS (Performance)
+! ============================================================================
+sysopt connection timewait 30000
+sysopt connection tcpmss 1380
+!
+! Connection Limits
+policy-map CONNECTION_LIMITS
+ class class-default
+  set connection conn-max 1000000
+  set connection embryonic-conn-max 10000
+  set connection per-client-max 1000
+!
+service-policy CONNECTION_LIMITS global
+
+! ============================================================================
+! TIMEOUT SETTINGS
+! ============================================================================
+timeout conn 1:00:00 half-closed 0:10:00 udp 0:02:00
+timeout icmp 0:00:02
+timeout tcp 0:30:00
+timeout sip 0:30:00
+timeout sip-invite 0:03:00
+
+! ============================================================================
+! INSPECTION POLICIES
+! ============================================================================
+policy-map type inspect dns DNS_INSPECT
+ parameters
+  message-length maximum 512
+!
+policy-map type inspect http HTTP_INSPECT
+ parameters
+  protocol-violation action drop
+!
+policy-map type inspect smtp SMTP_INSPECT
+ parameters
+  banner reject
+
+! ============================================================================
+! ZONE-BASED FIREWALL
+! ============================================================================
+class-map type inspect match-any INTERNAL_TRAFFIC
+ match access-group INSIDE_OUT
+!
+policy-map type inspect ZONE_POLICY
+ class type inspect INTERNAL_TRAFFIC
+  inspect
+ class class-default
+  drop log
+!
+service-policy type inspect ZONE_POLICY interface inside
+
+! ============================================================================
+! FAILOVER & HIGH AVAILABILITY (For Secondary Firewall)
+! ============================================================================
+failover
+failover lan unit primary
+failover lan interface failover GigabitEthernet0/4
+failover interface ip failover 10.10.10.252 255.255.255.0 standby 10.10.10.251
+failover key SapphireHA@2026
+!
+
+! ============================================================================
+! NTP TIME SYNC
+! ============================================================================
+ntp server 10.10.10.10 source inside
+ntp server pool.ntp.org source outside
+ntp authenticate
+ntp trusted-key 1
+
+! ============================================================================
+! SECURITY CONTEXT (Multi-tenant)
+! ============================================================================
+! Multiple security contexts disabled (Single context mode)
+!
+! ============================================================================
+! FINAL STEPS
+! ============================================================================
+write memory
+!
+! ============================================================================
+! CONFIGURATION SUMMARY
+! ============================================================================
+! ✅ Internet Access: Internal networks allowed (NAT)
+! ✅ Guest WiFi: Internet only, no internal access
+! ✅ CCTV: Only to NVR, blocked from internet
+! ✅ Management: IT staff only (SSH/HTTPS)
+! ✅ DMZ: Web/Mail servers accessible from internet
+! ✅ IPS/IDS: Active on all interfaces
+! ✅ URL Filtering: Social media, streaming blocked during work hours
+! ✅ VPN: Remote access for employees
+! ✅ Logging: Centralized to syslog server
+! ✅ SNMP: Monitoring enabled
+! ✅ High Availability: Ready for secondary firewall
+! ============================================================================

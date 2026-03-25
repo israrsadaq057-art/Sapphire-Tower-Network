@@ -1,0 +1,81 @@
+================================================================================
+CAMERA CONFIGURATION - FLOOR 1 RETAIL
+================================================================================
+
+Camera ID:           CAM-F1-04
+Camera Name:         Retail_Camera
+Location:            Retail Outlet Entrance
+Floor:               1
+Switch:              Access-SW-F1
+Port:                Gi1/0/5
+MAC Address:         00:1A:2B:3C:4D:61
+
+================================================================================
+NETWORK SETTINGS
+================================================================================
+IP Address:          10.10.20.14
+Subnet Mask:         255.255.255.0
+Default Gateway:     10.10.20.1
+DNS Server 1:        10.10.10.10
+DNS Server 2:        8.8.8.8
+HTTP Port:           80
+RTSP Port:           554
+HTTPS Port:          443
+ONVIF Port:          8000
+
+================================================================================
+VIDEO SETTINGS
+================================================================================
+Resolution:          3840 x 2160 (4K)
+Frame Rate:          15 fps
+Bitrate:             10 Mbps
+Codec:               H.265
+Video Stream:        Main Stream (4K), Sub Stream (720p)
+WDR:                 Enabled
+Day/Night:           Auto
+IR Mode:             Smart IR
+
+================================================================================
+MOTION DETECTION
+================================================================================
+Motion Detection:    Enabled
+Sensitivity:         Medium (50)
+Areas:               Store Entrance and Cash Counter
+Schedule:            24/7
+Trigger:             Record to NVR
+
+================================================================================
+NVR REGISTRATION
+================================================================================
+NVR IP:              10.10.60.10
+Channel:             4
+Protocol:            ONVIF
+Username:            admin
+Password:            Camera@2026
+Recording Mode:      Continuous 24/7
+Pre-record:          30 seconds
+Post-record:         30 seconds
+
+================================================================================
+ACCESS CONTROL
+================================================================================
+Allowed Destinations: 10.10.60.10 (NVR Only)
+Blocked Destinations: Internet, Other VLANs
+Firewall Rule:        CCTV_IN permit to NVR only
+VLAN:                 20 (CCTV)
+
+================================================================================
+PoE INFORMATION
+================================================================================
+PoE Status:          Active
+Power Consumption:   12W
+Switch Model:        Cisco Catalyst 9200-24P
+PoE Budget Used:     48W / 370W
+
+================================================================================
+CONTACT INFO
+================================================================================
+Installer:           Israr Sadaq
+Date Installed:      2026-03-25
+Warranty:            3 Years
+Support Contact:     israrsadaq057@gmail.com

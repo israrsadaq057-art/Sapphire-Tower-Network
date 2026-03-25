@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sapphire Tower - Complete Network Topology | Israr Sadaq</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Consolas', monospace;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b2e 100%);
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 30px 40px;
+            color: white;
+            border-bottom: 4px solid #f59e0b;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
+        .header h1 span {
+            color: #f59e0b;
+        }
+
+        .header .meta {
+            font-size: 13px;
+            opacity: 0.8;
+            margin-top: 8px;
+            font-family: monospace;
+        }
+
+        .badge-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-family: monospace;
+        }
+
+        /* Topology Container */
+        .topology {
+            padding: 40px;
+            background: linear-gradient(180deg, #ffffff 0%, #fef9e6 100%);
+            overflow-x: auto;
+        }
+
+        /* Core Network Diagram using Flex */
+        .network-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        /* Layer Styles */
+        .layer {
+            width: 100%;
+            text-align: center;
+        }
+
+        .layer-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: #e2e8f0;
+            display: inline-block;
+            padding: 5px 20px;
+            border-radius: 30px;
+        }
+
+        /* Device Container */
+        .device-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        /* Device Card */
+        .device {
+            background: white;
+            border-radius: 20px;
+            width: 220px;
+            padding: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .device:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.15);
+        }
+
+        /* Device Colors */
+        .device.core { border-top: 4px solid #dc2626; background: linear-gradient(135deg, #fff, #fff5f5); }
+        .device.distribution { border-top: 4px solid #f97316; background: linear-gradient(135deg, #fff, #fff7ed); }
+        .device.access { border-top: 4px solid #22c55e; background: linear-gradient(135deg, #fff, #f0fdf4); }
+        .device.camera { border-top: 4px solid #06b6d4; background: linear-gradient(135deg, #fff, #ecfeff); }
+        .device.ap { border-top: 4px solid #eab308; background: linear-gradient(135deg, #fff, #fefce8); }
+        .device.internet { border-top: 4px solid #6b7280; background: linear-gradient(135deg, #fff, #f9fafb); }
+
+        .device-icon {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .device-name {
+            font-weight: bold;
+            font-size: 13px;
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .device-ip {
+            font-size: 10px;
+            font-family: monospace;
+            text-align: center;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+
+        .device-detail {
+            font-size: 9px;
+            text-align: center;
+            color: #475569;
+        }
+
+        .status-led {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-up { background: #22c55e; box-shadow: 0 0 5px #22c55e; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* Connection Lines */
+        .connections {
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .connection-line {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .line {
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(180deg, #f97316, #22c55e, #06b6d4);
+            position: relative;
+        }
+
+        .line::after {
+            content: '▼';
+            position: absolute;
+            bottom: -15px;
+            left: -6px;
+            color: #f97316;
+            font-size: 12px;
+        }
+
+        .line-label {
+            font-size: 9px;
+            color: #f97316;
+            margin-top: 5px;
+            font-weight: bold;
+            background: #fff3e6;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        /* Multi-connection row */
+        .multi-connection {
+            display: flex;
+            justify-content: center;
+            gap: 100px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .uplink {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .uplink-line {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #f97316, #22c55e);
+            margin: 10px 0;
+        }
+
+        .uplink-label {
+            font-size: 9px;
+            color: #b45309;
+            background: #ffedd5;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        /* Floor Groups */
+        .floor-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        /* Footer */
+        .footer {
+            background: #0f172a;
+            padding: 20px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 550px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 20px;
+            border-radius: 24px 24px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body { padding: 20px; }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .info-label { font-weight: bold; color: #475569; }
+        .info-value { color: #0f172a; font-family: monospace; }
+        .close-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🏢 <span>SAPPHIRE TOWER</span> - ENTERPRISE NETWORK TOPOLOGY</h1>
+        <div class="meta">Shahrah-e-Faisal, Karachi, Pakistan | Complete Infrastructure Diagram</div>
+        <div class="badge-container">
+            <span class="badge">🔴 24 Security Cameras</span>
+            <span class="badge">📶 20 Access Points</span>
+            <span class="badge">🔌 13 Switches</span>
+            <span class="badge">💻 160+ Workstations</span>
+            <span class="badge">⚡ 1.8kW PoE Budget</span>
+        </div>
+        <div class="meta" style="margin-top: 10px;">Network Engineer: Israr Sadaq | CCNA | CCNP | Berlin, Germany</div>
+    </div>
+
+    <div class="topology">
+        <div class="network-diagram">
+
+            <!-- CORE LAYER -->
+            <div class="layer">
+                <div class="layer-title">🌐 CORE LAYER | Data Center (Basement)</div>
+                <div class="device-container">
+                    <div class="device internet" onclick="showDeviceDetails('internet')">
+                        <div class="device-icon">🌐</div>
+                        <div class="device-name">PTCL GATEWAY</div>
+                        <div class="device-ip">203.124.30.1</div>
+                        <div class="device-detail">100 Mbps Fiber</div>
+                        <div class="device-detail"><span class="status-led status-up"></span>Active</div>
+                    </div>
+                    <div class="device" style="border-top-color: #6b7280;" onclick="showDeviceDetails('firewall')">
+                        <div class="device-icon">🔥</div>
+                        <div class="device-name">CISCO FIREPOWER 1120</div>
+                        <div class="device-ip">10.10.10.254</div>
+                        <div class="device-detail">NGFW | IPS/IDS | VPN</div>
+                        <div class="device-detail"><span class="status-led status-up"></span>Active</div>
+                    </div>
+                    <div class="device core" onclick="showDeviceDetails('core')">
+                        <div class="device-icon">⚡</div>
+                        <div class="device-name">CORE-SW-01</div>
+                        <div class="device-ip">10.10.10.1</div>
+                        <div class="device-detail">Catalyst 9300-48P | 48 PoE+</div>
+                        <div class="device-detail"><span class="status-led status-up"></span>Active</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONNECTION from Core to Distribution -->
+            <div class="connections">
+                <div class="connection-line"><div class="line"></div><div class="line-label">40Gbps Fiber Trunk</div></div>
+            </div>
+
+            <!-- DISTRIBUTION LAYER -->
+            <div class="layer">
+                <div class="layer-title">📡 DISTRIBUTION LAYER | Floor IDFs</div>
+                <div class="device-container">
+                    <div class="device distribution" onclick="showDeviceDetails('dist-f1')">
+                        <div class="device-icon">🔄</div>
+                        <div class="device-name">DIST-SW-F1</div>
+                        <div class="device-ip">10.10.10.11</div>
+                        <div class="device-detail">Floor 1 - West Side</div>
+                        <div class="device-detail">4 Cams | 4 APs | 15 Users</div>
+                    </div>
+                    <div class="device distribution" onclick="showDeviceDetails('dist-f2')">
+                        <div class="device-icon">🔄</div>
+                        <div class="device-name">DIST-SW-F2</div>
+                        <div class="device-ip">10.10.10.12</div>
+                        <div class="device-detail">Floor 2 - East Side</div>
+                        <div class="device-detail">3 Cams | 3 APs | 20 Users</div>
+                    </div>
+                    <div class="device distribution" onclick="showDeviceDetails('dist-f3')">
+                        <div class="device-icon">🔄</div>
+                        <div class="device-name">DIST-SW-F3</div>
+                        <div class="device-ip">10.10.10.13</div>
+                        <div class="device-detail">Floor 3 - Center</div>
+                        <div class="device-detail">3 Cams | 3 APs | 25 Users</div>
+                    </div>
+                    <div class="device distribution" onclick="showDeviceDetails('dist-f4')">
+                        <div class="device-icon">🔄</div>
+                        <div class="device-name">DIST-SW-F4</div>
+                        <div class="device-ip">10.10.10.14</div>
+                        <div class="device-detail">Floor 4 - North Side</div>
+                        <div class="device-detail">4 Cams | 4 APs | 30 Users</div>
+                    </div>
+                    <div class="device distribution" onclick="showDeviceDetails('dist-f5')">
+                        <div class="device-icon">🔄</div>
+                        <div class="device-name">DIST-SW-F5</div>
+                        <div class="device-ip">10.10.10.15</div>
+                        <div class="device-detail">Floor 5 - South Side</div>
+                        <div class="device-detail">3 Cams | 4 APs | 20 Users</div>
+                    </div>
+                    <div class="device distribution" onclick="showDeviceDetails('dist-b1')">
+                        <div class="device-icon">🔄</div>
+                        <div class="device-name">DIST-SW-B1</div>
+                        <div class="device-ip">10.10.10.16</div>
+                        <div class="device-detail">Basement - Control Room</div>
+                        <div class="device-detail">4 Cams | 2 APs | NVR</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONNECTION from Distribution to Access -->
+            <div class="multi-connection">
+                <div class="uplink"><div class="uplink-line"></div><div class="uplink-label">10Gbps Fiber</div></div>
+                <div class="uplink"><div class="uplink-line"></div><div class="uplink-label">10Gbps Fiber</div></div>
+                <div class="uplink"><div class="uplink-line"></div><div class="uplink-label">10Gbps Fiber</div></div>
+                <div class="uplink"><div class="uplink-line"></div><div class="uplink-label">10Gbps Fiber</div></div>
+                <div class="uplink"><div class="uplink-line"></div><div class="uplink-label">10Gbps Fiber</div></div>
+                <div class="uplink"><div class="uplink-line"></div><div class="uplink-label">10Gbps Fiber</div></div>
+            </div>
+
+            <!-- ACCESS LAYER - Switches -->
+            <div class="layer">
+                <div class="layer-title">🔌 ACCESS LAYER | Per Floor IDFs</div>
+                <div class="device-container">
+                    <div class="device access" onclick="showDeviceDetails('access-f1')">
+                        <div class="device-icon">🔌</div>
+                        <div class="device-name">ACCESS-F1</div>
+                        <div class="device-ip">10.10.50.11</div>
+                        <div class="device-detail">18/24 Ports Used</div>
+                        <div class="device-detail">PoE: 245W/370W</div>
+                    </div>
+                    <div class="device access" onclick="showDeviceDetails('access-f2')">
+                        <div class="device-icon">🔌</div>
+                        <div class="device-name">ACCESS-F2</div>
+                        <div class="device-ip">10.10.50.12</div>
+                        <div class="device-detail">20/24 Ports Used</div>
+                        <div class="device-detail">PoE: 210W/370W</div>
+                    </div>
+                    <div class="device access" onclick="showDeviceDetails('access-f3')">
+                        <div class="device-icon">🔌</div>
+                        <div class="device-name">ACCESS-F3</div>
+                        <div class="device-ip">10.10.50.13</div>
+                        <div class="device-detail">22/24 Ports Used</div>
+                        <div class="device-detail">PoE: 235W/370W</div>
+                    </div>
+                    <div class="device access" onclick="showDeviceDetails('access-f4')">
+                        <div class="device-icon">🔌</div>
+                        <div class="device-name">ACCESS-F4</div>
+                        <div class="device-ip">10.10.50.14</div>
+                        <div class="device-detail">28/24 Ports Used</div>
+                        <div class="device-detail">PoE: 325W/370W</div>
+                    </div>
+                    <div class="device access" onclick="showDeviceDetails('access-f5')">
+                        <div class="device-icon">🔌</div>
+                        <div class="device-name">ACCESS-F5</div>
+                        <div class="device-ip">10.10.50.15</div>
+                        <div class="device-detail">18/24 Ports Used</div>
+                        <div class="device-detail">PoE: 290W/370W</div>
+                    </div>
+                    <div class="device access" onclick="showDeviceDetails('access-b1')">
+                        <div class="device-icon">🔌</div>
+                        <div class="device-name">ACCESS-B1</div>
+                        <div class="device-ip">10.10.60.11</div>
+                        <div class="device-detail">12/24 Ports Used</div>
+                        <div class="device-detail">PoE: 95W/370W</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONNECTION from Access to End Devices -->
+            <div class="multi-connection">
+                <div class="uplink"><div class="uplink-line" style="background: linear-gradient(90deg, #22c55e, #06b6d4);"></div><div class="uplink-label">1Gbps Copper</div></div>
+                <div class="uplink"><div class="uplink-line" style="background: linear-gradient(90deg, #22c55e, #06b6d4);"></div><div class="uplink-label">1Gbps Copper</div></div>
+                <div class="uplink"><div class="uplink-line" style="background: linear-gradient(90deg, #22c55e, #06b6d4);"></div><div class="uplink-label">1Gbps Copper</div></div>
+                <div class="uplink"><div class="uplink-line" style="background: linear-gradient(90deg, #22c55e, #06b6d4);"></div><div class="uplink-label">1Gbps Copper</div></div>
+                <div class="uplink"><div class="uplink-line" style="background: linear-gradient(90deg, #22c55e, #06b6d4);"></div><div class="uplink-label">1Gbps Copper</div></div>
+                <div class="uplink"><div class="uplink-line" style="background: linear-gradient(90deg, #22c55e, #06b6d4);"></div><div class="uplink-label">1Gbps Copper</div></div>
+            </div>
+
+            <!-- END DEVICES - Cameras per Floor -->
+            <div class="layer">
+                <div class="layer-title">📷 SECURITY CAMERAS (24 Total)</div>
+                <div class="floor-group">
+                    <div class="device camera" onclick="showDeviceDetails('cam-f1')">
+                        <div class="device-icon">📷</div>
+                        <div class="device-name">Floor 1</div>
+                        <div class="device-ip">10.10.20.11-14</div>
+                        <div class="device-detail">4 Cameras</div>
+                        <div class="device-detail">Lobby | Reception | Coffee | Retail</div>
+                    </div>
+                    <div class="device camera" onclick="showDeviceDetails('cam-f2')">
+                        <div class="device-icon">📷</div>
+                        <div class="device-name">Floor 2</div>
+                        <div class="device-ip">10.10.20.21-23</div>
+                        <div class="device-detail">3 Cameras</div>
+                        <div class="device-detail">Marketing | Sales | Elevator</div>
+                    </div>
+                    <div class="device camera" onclick="showDeviceDetails('cam-f3')">
+                        <div class="device-icon">📷</div>
+                        <div class="device-name">Floor 3</div>
+                        <div class="device-ip">10.10.20.31-33</div>
+                        <div class="device-detail">3 Cameras</div>
+                        <div class="device-detail">Finance | HR | Elevator</div>
+                    </div>
+                    <div class="device camera" onclick="showDeviceDetails('cam-f4')">
+                        <div class="device-icon">📷</div>
+                        <div class="device-name">Floor 4</div>
+                        <div class="device-ip">10.10.20.41-44</div>
+                        <div class="device-detail">4 Cameras</div>
+                        <div class="device-detail">IT Lab | NOC | Server | Elevator</div>
+                    </div>
+                    <div class="device camera" onclick="showDeviceDetails('cam-f5')">
+                        <div class="device-icon">📷</div>
+                        <div class="device-name">Floor 5</div>
+                        <div class="device-ip">10.10.20.51-53</div>
+                        <div class="device-detail">3 Cameras</div>
+                        <div class="device-detail">Executive | Board Room | Elevator</div>
+                    </div>
+                    <div class="device camera" onclick="showDeviceDetails('cam-b1')">
+                        <div class="device-icon">📷</div>
+                        <div class="device-name">Basement</div>
+                        <div class="device-ip">10.10.20.61-64</div>
+                        <div class="device-detail">4 Cameras</div>
+                        <div class="device-detail">Parking A/B | Security | Elevator</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACCESS POINTS -->
+            <div class="layer">
+                <div class="layer-title">📶 WIFI ACCESS POINTS (20 Total)</div>
+                <div class="floor-group">
+                    <div class="device ap" onclick="showDeviceDetails('ap-f1')">
+                        <div class="device-icon">📶</div>
+                        <div class="device-name">Floor 1</div>
+                        <div class="device-detail">4 APs | Cisco 9120AXI</div>
+                        <div class="device-detail">SSID: Sapphire-Staff</div>
+                    </div>
+                    <div class="device ap" onclick="showDeviceDetails('ap-f2')">
+                        <div class="device-icon">📶</div>
+                        <div class="device-name">Floor 2</div>
+                        <div class="device-detail">3 APs | Cisco 9120AXI</div>
+                        <div class="device-detail">SSID: Sapphire-Staff</div>
+                    </div>
+                    <div class="device ap" onclick="showDeviceDetails('ap-f3')">
+                        <div class="device-icon">📶</div>
+                        <div class="device-name">Floor 3</div>
+                        <div class="device-detail">3 APs | Cisco 9120AXI</div>
+                        <div class="device-detail">SSID: Sapphire-Staff</div>
+                    </div>
+                    <div class="device ap" onclick="showDeviceDetails('ap-f4')">
+                        <div class="device-icon">📶</div>
+                        <div class="device-name">Floor 4</div>
+                        <div class="device-detail">4 APs | Cisco 9130AXI</div>
+                        <div class="device-detail">SSID: Sapphire-Staff</div>
+                    </div>
+                    <div class="device ap" onclick="showDeviceDetails('ap-f5')">
+                        <div class="device-icon">📶</div>
+                        <div class="device-name">Floor 5</div>
+                        <div class="device-detail">4 APs | Cisco 9130AXI</div>
+                        <div class="device-detail">SSID: Sapphire-Executive</div>
+                    </div>
+                    <div class="device ap" onclick="showDeviceDetails('ap-b1')">
+                        <div class="device-icon">📶</div>
+                        <div class="device-name">Basement</div>
+                        <div class="device-detail">2 APs | Cisco 9120AXI</div>
+                        <div class="device-detail">SSID: Sapphire-Staff</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTROL ROOM -->
+            <div class="layer">
+                <div class="layer-title">🎮 SECURITY CONTROL ROOM (Basement)</div>
+                <div class="device-container">
+                    <div class="device" style="border-top-color: #8b5cf6; background: linear-gradient(135deg, #fff, #f5f3ff);" onclick="showDeviceDetails('nvr')">
+                        <div class="device-icon">💾</div>
+                        <div class="device-name">NVR-01</div>
+                        <div class="device-ip">10.10.60.10</div>
+                        <div class="device-detail">Hikvision 32-Channel</div>
+                        <div class="device-detail">48TB Storage | 30 Days Retention</div>
+                    </div>
+                    <div class="device" style="border-top-color: #8b5cf6; background: linear-gradient(135deg, #fff, #f5f3ff);">
+                        <div class="device-icon">🖥️</div>
+                        <div class="device-name">Security Workstations</div>
+                        <div class="device-ip">10.10.60.11-12</div>
+                        <div class="device-detail">2 Operator Stations</div>
+                        <div class="device-detail">4x 32" 4K Monitor Wall</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 Israr Sadaq | Network Engineer | CCNA | CCNP | Berlin, Germany</p>
+        <p>📧 israrsadaq057@gmail.com | 📱 +49 152525267799</p>
+        <p>💡 Click on any device to see detailed specifications | All devices operational</p>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="deviceModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Device Details</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+    const deviceDetails = {
+        internet: { name: "PTCL Gateway", details: { "ISP": "PTCL Flash Fiber", "Speed": "100 Mbps Symmetric", "Public IP": "203.124.30.1", "Gateway IP": "203.124.30.254", "Type": "Fiber Optic", "Status": "Active" } },
+        firewall: { name: "Cisco Firepower 1120", details: { "Management IP": "10.10.10.254", "Throughput": "1.2 Gbps", "IPS Throughput": "650 Mbps", "VPN Throughput": "300 Mbps", "Features": "IPS/IDS, SSL Decryption, URL Filtering, Malware Defense", "Status": "Active" } },
+        core: { name: "Core Switch", details: { "Model": "Cisco Catalyst 9300-48P", "IP": "10.10.10.1", "Ports": "48 x 1G PoE+", "Uplinks": "4 x 25G SFP28", "PoE Budget": "740W", "Stack": "StackWise Virtual", "Location": "Basement - Server Room" } },
+        "dist-f1": { name: "Distribution Switch F1", details: { "Location": "Floor 1 - West Side IDF", "IP": "10.10.10.11", "Model": "Catalyst 9200-24P", "Uplink": "10G Fiber to Core", "Connected": "4 Cameras, 4 APs, 15 Workstations" } },
+        "dist-f2": { name: "Distribution Switch F2", details: { "Location": "Floor 2 - East Side IDF", "IP": "10.10.10.12", "Connected": "3 Cameras, 3 APs, 20 Workstations" } },
+        "dist-f3": { name: "Distribution Switch F3", details: { "Location": "Floor 3 - Center IDF", "IP": "10.10.10.13", "Connected": "3 Cameras, 3 APs, 25 Workstations" } },
+        "dist-f4": { name: "Distribution Switch F4", details: { "Location": "Floor 4 - North Side IDF", "IP": "10.10.10.14", "Connected": "4 Cameras, 4 APs, 30 Workstations" } },
+        "dist-f5": { name: "Distribution Switch F5", details: { "Location": "Floor 5 - South Side IDF", "IP": "10.10.10.15", "Connected": "3 Cameras, 4 APs, 20 Workstations" } },
+        "dist-b1": { name: "Distribution Switch B1", details: { "Location": "Basement - Control Room", "IP": "10.10.10.16", "Connected": "4 Cameras, 2 APs, NVR, 2 Workstations" } },
+        "access-f1": { name: "Access Switch F1", details: { "IP": "10.10.50.11", "Model": "Catalyst 9200-24P", "Ports Used": "18/24", "PoE Used": "245W/370W", "Connected": "4 Cameras, 4 APs, 10 Workstations" } },
+        "access-f2": { name: "Access Switch F2", details: { "IP": "10.10.50.12", "Ports Used": "20/24", "PoE Used": "210W/370W", "Connected": "3 Cameras, 3 APs, 14 Workstations" } },
+        "access-f3": { name: "Access Switch F3", details: { "IP": "10.10.50.13", "Ports Used": "22/24", "PoE Used": "235W/370W", "Connected": "3 Cameras, 3 APs, 16 Workstations" } },
+        "access-f4": { name: "Access Switch F4", details: { "IP": "10.10.50.14", "Ports Used": "28/24", "PoE Used": "325W/370W", "Connected": "4 Cameras, 4 APs, 20 Workstations" } },
+        "access-f5": { name: "Access Switch F5", details: { "IP": "10.10.50.15", "Ports Used": "18/24", "PoE Used": "290W/370W", "Connected": "3 Cameras, 4 APs, 11 Workstations" } },
+        "access-b1": { name: "Access Switch B1", details: { "IP": "10.10.60.11", "Ports Used": "12/24", "PoE Used": "95W/370W", "Connected": "4 Cameras, 2 APs, NVR, 2 Workstations" } },
+        "cam-f1": { name: "Floor 1 Cameras", details: { "Model": "Hikvision DS-2CD2386G2", "Resolution": "4K (8MP)", "Locations": "Lobby (10.10.20.11), Reception (10.10.20.12), Coffee Shop (10.10.20.13), Retail (10.10.20.14)", "Storage": "NVR-01", "Recording": "24/7" } },
+        "cam-f2": { name: "Floor 2 Cameras", details: { "Model": "Hikvision DS-2CD2386G2", "Locations": "Marketing (10.10.20.21), Sales (10.10.20.22), Elevator (10.10.20.23)" } },
+        "cam-f3": { name: "Floor 3 Cameras", details: { "Locations": "Finance (10.10.20.31), HR (10.10.20.32), Elevator (10.10.20.33)" } },
+        "cam-f4": { name: "Floor 4 Cameras", details: { "Locations": "IT Lab (10.10.20.41), NOC (10.10.20.42), Server Room (10.10.20.43), Elevator (10.10.20.44)" } },
+        "cam-f5": { name: "Floor 5 Cameras", details: { "Locations": "Executive (10.10.20.51), Board Room (10.10.20.52), Elevator (10.10.20.53)" } },
+        "cam-b1": { name: "Basement Cameras", details: { "Locations": "Parking A (10.10.20.61), Parking B (10.10.20.62), Security Office (10.10.20.63), Elevator (10.10.20.64)" } },
+        "ap-f1": { name: "Floor 1 APs", details: { "Model": "Cisco Catalyst 9120AXI", "Quantity": "4", "SSID": "Sapphire-Staff", "Security": "WPA2-Enterprise" } },
+        "ap-f2": { name: "Floor 2 APs", details: { "Model": "Cisco Catalyst 9120AXI", "Quantity": "3", "SSID": "Sapphire-Staff" } },
+        "ap-f3": { name: "Floor 3 APs", details: { "Model": "Cisco Catalyst 9120AXI", "Quantity": "3", "SSID": "Sapphire-Staff" } },
+        "ap-f4": { name: "Floor 4 APs", details: { "Model": "Cisco Catalyst 9130AXI", "Quantity": "4", "SSID": "Sapphire-Staff", "Band": "Tri-band" } },
+        "ap-f5": { name: "Floor 5 APs", details: { "Model": "Cisco Catalyst 9130AXI", "Quantity": "4", "SSID": "Sapphire-Executive", "Security": "WPA3-Enterprise" } },
+        "ap-b1": { name: "Basement APs", details: { "Model": "Cisco Catalyst 9120AXI", "Quantity": "2", "SSID": "Sapphire-Staff" } },
+        "nvr": { name: "Network Video Recorder", details: { "Model": "Hikvision DS-9632NI-I8", "IP": "10.10.60.10", "Storage": "4 x 12TB WD Purple (48TB RAID 10)", "Channels": "32 (24 used)", "Retention": "30 Days", "Resolution": "4K Recording" } }
+    };
+
+    function showDeviceDetails(deviceId) {
+        const device = deviceDetails[deviceId];
+        if (!device) return;
+        
+        const modal = document.getElementById('deviceModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        
+        modalTitle.textContent = device.name;
+        
+        let html = `<div class="info-grid"><div class="info-label">Status:</div><div class="info-value"><span style="color: #22c55e;">● Active</span></div></div>`;
+        
+        for (const [key, value] of Object.entries(device.details)) {
+            html += `<div class="info-grid"><div class="info-label">${key}:</div><div class="info-value">${value}</div></div>`;
+        }
+        
+        modalBody.innerHTML = html;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('deviceModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('deviceModal');
+        if (event.target === modal) closeModal();
+    };
+</script>
+</body>
+</html>

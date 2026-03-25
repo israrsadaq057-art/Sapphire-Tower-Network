@@ -1,0 +1,79 @@
+================================================================================
+CAMERA CONFIGURATION - FLOOR 4 IT LAB (CRITICAL ZONE)
+================================================================================
+
+Camera ID:           CAM-F4-01
+Camera Name:         ITLab_Camera
+Location:            IT Lab - Server Room Entrance
+Floor:               4
+Switch:              Access-SW-F4
+Port:                Gi1/0/2
+MAC Address:         00:1A:2B:3C:4D:68
+
+================================================================================
+NETWORK SETTINGS
+================================================================================
+IP Address:          10.10.20.41
+Subnet Mask:         255.255.255.0
+Default Gateway:     10.10.20.1
+DNS Server 1:        10.10.10.10
+DNS Server 2:        8.8.8.8
+HTTP Port:           80
+RTSP Port:           554
+HTTPS Port:          443
+ONVIF Port:          8000
+
+================================================================================
+VIDEO SETTINGS
+================================================================================
+Resolution:          3840 x 2160 (4K)
+Frame Rate:          30 fps (Higher for Critical Area)
+Bitrate:             15 Mbps
+Codec:               H.265
+WDR:                 Enabled
+Day/Night:           Auto
+IR Mode:             Smart IR
+
+================================================================================
+MOTION DETECTION
+================================================================================
+Motion Detection:    Enabled (Critical Security)
+Sensitivity:         High (90)
+Areas:               Full Frame - Server Room Entrance
+Schedule:            24/7
+Trigger:             Record to NVR, Email Alert to IT Security, Push Notification
+
+================================================================================
+NVR REGISTRATION
+================================================================================
+NVR IP:              10.10.60.10
+Channel:             11
+Protocol:            ONVIF
+Username:            admin
+Password:            Camera@2026
+Recording Mode:      Continuous 24/7
+Pre-record:          60 seconds
+Post-record:         60 seconds
+
+================================================================================
+SECURITY ACCESS
+================================================================================
+Allowed Destinations: 10.10.60.10 (NVR Only)
+Blocked Destinations: Internet, Other VLANs
+Firewall Rule:        CCTV_IN permit to NVR only
+VLAN:                 20 (CCTV)
+Alerts:              Email to noc@sapphire.com, SMS to IT Manager
+
+================================================================================
+PoE INFORMATION
+================================================================================
+PoE Status:          Active
+Power Consumption:   12W
+Switch Model:        Cisco Catalyst 9200-24P
+PoE Budget Used:     132W / 370W
+
+================================================================================
+CONTACT INFO
+================================================================================
+Installer:           Israr Sadaq
+Date Installed:      2026-03-25
